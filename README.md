@@ -113,7 +113,7 @@ powershell -ExecutionPolicy Bypass -File build/publicar.ps1
 ```
 
 Opções: `-SemTestes` (pula a suíte), `-SemInstalador` (só o portátil). A versão fica em `Directory.Build.props`.
-O ícone atual é provisório (`build/gerar-icone.ps1`); a identidade visual final vem depois.
+O ícone (bastidor com um X sendo bordado pela agulha) é gerado por `build/gerar-icone.ps1`; a tela de abertura ainda não existe.
 
 ---
 
@@ -258,5 +258,5 @@ Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 - **Ficha de produção** para impressão (cores, ordem, tamanho, número de pontos).
 
 **Acabamento do produto**
-- **Identidade visual:** logo do Bordadox (por exemplo, um "X" sendo bordado), ícone do aplicativo e da janela, tela de abertura.
-- ~~Instalador e versão portátil~~ (feitos: `build/publicar.ps1`). Falta assinar o instalador (o Windows pode avisar "editor desconhecido") e trocar o ícone provisório pela identidade final.
+- **Identidade visual:** ícone do aplicativo e da janela já feito (bastidor com um X sendo bordado); falta a tela de abertura e uma logo para uso em documentos.
+- ~~Instalador e versão portátil~~ (feitos: `build/publicar.ps1`). Falta assinar o instalador (o Windows pode avisar "editor desconhecido").
