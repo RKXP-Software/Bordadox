@@ -196,13 +196,39 @@ public sealed class StitchBlockObject : EmbObject
     [Category("Pontos importados"), DisplayName("Ponto mínimo (mm)"), Range(0, 100, 0.1)]
     public double MinStitchMm { get; set; }
 
+    /// <summary>Trechos cujo fim e o início do próximo estão a menos que isto (mm) viram um trecho só: menos saltos e cortes. 0 = não junta.</summary>
+    [Category("Pontos importados"), DisplayName("Juntar trechos mais próximos que (mm)"), Range(0, 100, 0.5)]
+    public double JoinGapMm { get; set; }
+
+    /// <summary>Trechos de costura mais curtos que isto (mm) são apagados (ruído, arremates soltos). 0 = não apaga.</summary>
+    [Category("Pontos importados"), DisplayName("Remover trechos menores que (mm)"), Range(0, 100, 0.1)]
+    public double MinRunMm { get; set; }
+
     public override string TypeName => "Pontos importados";
     public override IReadOnlyList<IReadOnlyList<PathNode>> EditablePaths => Array.Empty<IReadOnlyList<PathNode>>();
     public override void SetNode(int path, int index, PathNode node) { }
     public override void InsertNode(int path, int index, PathNode node) { }
     public override bool RemoveNode(int path, int index) => false;
 
-    public override List<List<Vec2>> GenerateRuns(Vec2? from) => Runs.Select(Process).ToList();
+    public override List<List<Vec2>> GenerateRuns(Vec2? from) => JoinRuns(DropShortRuns(Runs)).Select(Process).ToList();
+
+    private List<List<Vec2>> DropShortRuns(List<List<Vec2>> runs) =>
+        MinRunMm <= 0 ? runs : runs.Where(r => GeometryUtil.PolylineLength(r) >= MinRunMm).ToList();
+
+    /// <summary>Junta trechos vizinhos: o fim de um liga ao início do próximo por um ponto reto.</summary>
+    private List<List<Vec2>> JoinRuns(List<List<Vec2>> runs)
+    {
+        if (JoinGapMm <= 0 || runs.Count < 2) return runs;
+        var result = new List<List<Vec2>>();
+        List<Vec2>? current = null;
+        foreach (var run in runs)
+        {
+            if (run.Count == 0) continue;
+            if (current != null && Vec2.Distance(current[^1], run[0]) <= JoinGapMm) current.AddRange(run);
+            else { current = run.ToList(); result.Add(current); }
+        }
+        return result;
+    }
 
     /// <summary>Aplica o ponto mínimo (tira pontos muito próximos) e o máximo (divide pontos longos), sem mexer no desenho original.</summary>
     private List<Vec2> Process(List<Vec2> run)

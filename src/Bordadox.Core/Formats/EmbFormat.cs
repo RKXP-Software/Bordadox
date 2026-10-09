@@ -40,7 +40,10 @@ public sealed class EmbFormat : IEmbroideryFormat
 
     public const string Explanation =
         "Este é um arquivo .emb da Wilcom. Os pontos dele ficam num formato fechado da Wilcom, que o Bordadox não consegue ler.\n\n" +
-        "Para trazer o desenho: abra o arquivo no Wilcom, use Arquivo › Exportar (ou \"Salvar como\") e escolha DST ou PES, e abra esse arquivo aqui.";
+        "Para trazer o desenho: abra o arquivo no Wilcom, use Arquivo › Exportar (ou \"Salvar como\") e escolha DST ou PES, e abra esse arquivo aqui.
+
+" +
+        "Quem não tem o Wilcom completo pode usar o Wilcom TrueSizer (da própria Wilcom), que abre arquivos .emb e salva em DST ou PES; confira o preço atual no site da Wilcom.";
 
     public StitchPattern Read(Stream stream)
     {

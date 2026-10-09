@@ -277,7 +277,7 @@ detecção de fotos, digitalização de ponta a ponta com imagens reais, aplique
   poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
 - **A estimativa de pontos** da janela é aproximada (erro de uns 10% nos logos de teste; o valor final, depois de gerar, é exato).
 - Formatos: **PES** (validado na máquina), **DST**, **EXP**, **JEF** e **VP3** (estes quatro sem validação em máquina ou software da marca; o PES é o recomendado para a NQ1400E).
-- **.emb da Wilcom não abre**: é um arquivo composto OLE2 cujos dados do desenho (fluxos `DesignDocument` e `CorelDocument`) não são compactação comum e têm entropia de dado cifrado; sem especificação pública, o Bordadox não os lê. Ao abrir um .emb, a janela mostra a miniatura guardada nele, explica como exportar como DST/PES no Wilcom e, se houver na mesma pasta o mesmo desenho em DST/PES/EXP/JEF/VP3, oferece abri-lo.
+- **.emb da Wilcom não abre**: é um arquivo composto OLE2 cujos dados do desenho (fluxos `DesignDocument` e `CorelDocument`) não são compactação comum e têm entropia de dado cifrado; sem especificação pública, o Bordadox não os lê. Ao abrir um .emb, a janela mostra a miniatura guardada nele, explica como exportar como DST/PES no Wilcom (ou com o Wilcom TrueSizer, que abre .emb e converte) e, se houver na mesma pasta o mesmo desenho em DST/PES/EXP/JEF/VP3, oferece abri-lo.
 - Somente **Windows** (WPF).
 
 ---

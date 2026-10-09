@@ -60,6 +60,7 @@ public static class Exploder
                 Runs = new() { runs[i].ToList() },
                 MaxStitchMm = block.MaxStitchMm,
                 MinStitchMm = block.MinStitchMm,
+                MinRunMm = block.MinRunMm,
                 StopBefore = i == 0 && block.StopBefore,
             });
         return parts;

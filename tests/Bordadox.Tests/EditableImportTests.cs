@@ -189,3 +189,71 @@ public class EmbFormatTests
         Assert.Equal(100, BitConverter.ToInt32(ex.PreviewBmp, 18));     // a miniatura tem 100 x 100
     }
 }
+
+public class ImportedCleanupTests
+{
+    private static StitchBlockObject Block() => new()
+    {
+        Runs = new()
+        {
+            new() { new(0, 0), new(10, 0) },
+            new() { new(10.5, 0), new(20, 0) },
+            new() { new(50, 0), new(60, 0) },
+            new() { new(80, 0), new(80.3, 0) },        // trecho minúsculo
+        },
+    };
+
+    [Fact]
+    public void Panel_HasTheCleanupFields()
+    {
+        var names = typeof(StitchBlockObject).GetProperties().Select(p => p.Name).ToList();
+        Assert.Contains("JoinGapMm", names);
+        Assert.Contains("MinRunMm", names);
+    }
+
+    [Fact]
+    public void JoinGap_ConnectsCloseRuns_AndLeavesTheFarOnesAlone()
+    {
+        var o = Block();
+        Assert.Equal(4, o.GenerateRuns(null).Count);
+        o.JoinGapMm = 1;
+        var runs = o.GenerateRuns(null);
+        Assert.Equal(3, runs.Count);
+        Assert.Equal(4, runs[0].Count);                    // os dois primeiros trechos viraram um
+        o.JoinGapMm = 100;
+        Assert.Single(o.GenerateRuns(null));               // "remover todos os saltos"
+        Assert.Equal(4, o.Runs.Count);                     // o original continua igual
+    }
+
+    [Fact]
+    public void MinRun_DropsTinyRuns()
+    {
+        var o = Block();
+        o.MinRunMm = 1;
+        var runs = o.GenerateRuns(null);
+        Assert.Equal(3, runs.Count);
+        Assert.DoesNotContain(runs, r => r[0].X > 79);
+    }
+
+    [Fact]
+    public void JoiningRuns_ReducesTrimsInTheMachinePattern()
+    {
+        var o = Block();
+        o.Color = BrotherPalette.Colors[5];
+        var d = new EmbDesign();
+        d.Objects.Add(o);
+        int before = d.BuildPattern("t").TrimCount;
+        o.JoinGapMm = 100;
+        int after = d.BuildPattern("t").TrimCount;
+        Assert.True(after < before, $"cortes: {before} -> {after}");
+    }
+
+    [Fact]
+    public void ExplodedParts_KeepTheCleanupOptionsThatStillApply()
+    {
+        var o = Block();
+        o.MinRunMm = 1;
+        var parts = Exploder.Explode(o).Cast<StitchBlockObject>().ToList();
+        Assert.All(parts, p => Assert.Equal(1, p.MinRunMm));
+    }
+}
