@@ -17,6 +17,8 @@ public sealed record FillSettings
     public double PullCompensation { get; init; }
     /// <summary>Quanto cada linha recua da borda (usado no reforço por baixo), em mm.</summary>
     public double Inset { get; init; }
+    /// <summary>Se informado, só as linhas (numeradas a partir de 0, de cima para baixo) para as quais devolve true são costuradas. Usado no degradê.</summary>
+    public Func<int, bool>? KeepRow { get; init; }
 }
 
 /// <summary>
@@ -27,6 +29,24 @@ public static class FillGenerator
 {
     private readonly record struct Segment(double X0, double X1, double Y, int Row);
 
+    /// <summary>Um trecho de linha de costura, no sistema girado: de X0 a X1 na altura Y, na linha de número Row.</summary>
+    public readonly record struct RowSegment(double X0, double X1, double Y, int Row);
+
+    /// <summary>
+    /// Trechos de costura que cobrem a forma, linha a linha, no sistema girado por <paramref name="angleDeg"/> (gire os pontos de volta com
+    /// <c>Rotate(+ângulo)</c>). Serve para padrões decorativos que seguem as mesmas linhas do preenchimento.
+    /// </summary>
+    public static List<RowSegment> Rows(IReadOnlyList<IReadOnlyList<Vec2>> contours, double angleDeg, double spacing)
+    {
+        var result = new List<RowSegment>();
+        if (contours.Count == 0 || contours[0].Count < 3 || spacing <= 0.01) return result;
+        double rad = angleDeg * Math.PI / 180;
+        var rotated = contours.Where(c => c.Count >= 3).Select(c => c.Select(p => p.Rotate(-rad)).ToList()).ToList();
+        foreach (var row in BuildRows(rotated, new FillSettings { Spacing = spacing }))
+            result.AddRange(row.Select(sg => new RowSegment(sg.X0, sg.X1, sg.Y, sg.Row)));
+        return result;
+    }
+
     public static List<List<Vec2>> Fill(IReadOnlyList<IReadOnlyList<Vec2>> contours, FillSettings s, Vec2? from = null)
     {
         var result = new List<List<Vec2>>();
@@ -36,6 +56,7 @@ public static class FillGenerator
         var rotated = contours.Where(c => c.Count >= 3).Select(c => c.Select(p => p.Rotate(-rad)).ToList()).ToList();
 
         var rows = BuildRows(rotated, s);
+        if (s.KeepRow != null) rows = rows.Where((_, i) => s.KeepRow(i)).ToList();   // as linhas que sobram ficam adjacentes na lista
         var regions = BuildRegions(rows);
 
         var pos = from?.Rotate(-rad);

@@ -9,7 +9,7 @@ using Bordadox.Core.Stitches;
 
 namespace Bordadox.App.Editor;
 
-public enum EditorTool { Select, Run, Satin, Fill, Hole, Text }
+public enum EditorTool { Select, Run, Satin, Fill, Hole, Text, Applique }
 
 /// <summary>
 /// Estado e regras do editor: desenho atual, seleção, ferramentas, arrastar, edição de nós e desfazer.
@@ -65,8 +65,8 @@ public sealed class EditorController
             if (_tool == value) return;
             _tool = value;
             Drawing.Clear();
-            if (value == EditorTool.Hole && !(Selection.Count == 1 && Selection[0] is FillObject))
-                Message?.Invoke("Selecione um preenchimento antes de desenhar o furo.");
+            if (value == EditorTool.Hole && !(Selection.Count == 1 && Selection[0] is ShapeObject))
+                Message?.Invoke("Selecione um preenchimento ou aplique antes de desenhar o furo.");
             ToolChanged?.Invoke();
             OverlayChanged?.Invoke();
         }
@@ -76,6 +76,7 @@ public sealed class EditorController
     {
         EditorTool.Select => "Clique para selecionar · arraste para mover · Ctrl+clique no contorno insere nó · duplo-clique no nó remove · clique direito no nó alterna canto/curva",
         EditorTool.Text => "Clique onde o texto deve começar (linha de base) · depois ajuste fonte, altura e espaçamento em Propriedades · duplo-clique num texto (ferramenta Selecionar) edita o conteúdo",
+        EditorTool.Applique => "Clique os cantos do contorno do tecido do aplique · esquerdo = canto · direito = curva · Enter ou duplo-clique conclui · depois ajuste a largura do acabamento e as cores em Propriedades",
         EditorTool.Satin => "Clique alternando os dois lados da coluna (A, B, A, B...) · esquerdo = canto · direito = curva · Enter conclui · Esc cancela · Backspace desfaz ponto",
         _ => "Clique esquerdo = canto · clique direito = curva · Shift = ângulo de 15° · Enter ou duplo-clique conclui · Esc cancela · Backspace desfaz ponto",
     };
@@ -315,6 +316,33 @@ public sealed class EditorController
         if (Selection.Count == 0) return;
         Change(() => { foreach (var o in Selection) o.Color = color; });
         SelectionChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Converte os preenchimentos selecionados em aplique (ou os apliques em preenchimento), mantendo o contorno, os furos,
+    /// o nome, a cor e a posição na ordem de costura. Devolve quantos objetos foram convertidos.
+    /// </summary>
+    public int ConvertShapes(bool toApplique)
+    {
+        var targets = Selection.Where(o => toApplique ? o is FillObject : o is AppliqueObject).Cast<ShapeObject>().ToList();
+        if (targets.Count == 0) return 0;
+        var created = new List<EmbObject>();
+        Change(() =>
+        {
+            foreach (var old in targets)
+            {
+                ShapeObject neu = toApplique ? new AppliqueObject() : new FillObject();
+                neu.Outline = old.Outline.ToList();
+                neu.Holes = old.Holes.Select(h => h.ToList()).ToList();
+                neu.Color = old.Color;
+                neu.Name = old.Name;
+                int i = Design.Objects.IndexOf(old);
+                Design.Objects[i] = neu;
+                created.Add(neu);
+            }
+        });
+        Select(created);
+        return created.Count;
     }
 
     /// <summary>Move a seleção na ordem de costura (-1 = antes, +1 = depois).</summary>
@@ -632,13 +660,16 @@ public sealed class EditorController
             case EditorTool.Fill when nodes.Count >= 3:
                 obj = new FillObject { Outline = nodes, Name = $"Preenchimento {n}" };
                 break;
+            case EditorTool.Applique when nodes.Count >= 3:
+                obj = new AppliqueObject { Outline = nodes, Name = $"Aplique {n}" };
+                break;
             case EditorTool.Hole when nodes.Count >= 3:
-                if (Selection.Count == 1 && Selection[0] is FillObject fill)
+                if (Selection.Count == 1 && Selection[0] is ShapeObject fill)
                 {
                     Change(() => fill.Holes.Add(nodes));
                     OverlayChanged?.Invoke();
                 }
-                else Message?.Invoke("Selecione um preenchimento antes de desenhar o furo.");
+                else Message?.Invoke("Selecione um preenchimento ou aplique antes de desenhar o furo.");
                 return;
             default:
                 if (nodes.Count > 0)
@@ -727,7 +758,7 @@ public sealed class EditorController
         }
         else
         {
-            bool closed = _tool is EditorTool.Fill or EditorTool.Hole;
+            bool closed = _tool is EditorTool.Fill or EditorTool.Hole or EditorTool.Applique;
             DrawPolyline(dc, pen, PathUtil.Flatten(nodes, closed && nodes.Count >= 3), closed && nodes.Count >= 3);
         }
         foreach (var n in Drawing) DrawNode(dc, n, px, Brushes.White, pen);

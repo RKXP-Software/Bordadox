@@ -44,7 +44,7 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 
 ### Editor
 - Ferramentas: **Selecionar**, **Ponto corrido** (simples ou triplo), **Coluna satin** (dois trilhos), **Preenchimento** (tatami ou satin,
-  com furos) e **Texto**.
+  com furos e efeitos), **Aplique** e **Texto**.
 - Cantos e curvas ao desenhar (clique esquerdo = canto, direito = curva), Shift = ângulos de 15°.
 - Editar nós (arrastar, inserir, remover, alternar canto/curva), mover, selecionar por área, girar, espelhar, redimensionar,
   centralizar, duplicar, copiar/colar, **desfazer/refazer**, reordenar a sequência de costura e trocar a cor pela paleta Brother.
@@ -53,6 +53,14 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 - **Montagem automática da costura:** pontos de arremate, cortes em saltos longos, trocas de cor e ligação dos trechos
   de um preenchimento por dentro da forma (menos saltos e cortes).
 - Imagem de fundo (PNG, JPG, BMP, SVG) com posição, largura e opacidade, para desenhar por cima.
+
+### Aplique e efeitos de preenchimento
+- **Aplique** (ferramenta **Aplique**, atalho **A**, ou **Objeto › Converter em aplique** num preenchimento): três passos com parada da
+  máquina entre eles. 1) **linha de posicionamento** (mostra onde colocar o tecido); 2) **fixação** em zigue-zague ou ponto corrido;
+  3) **acabamento em satin** com largura e densidade ajustáveis, cantos em leque e furos. Guia e fixação usam uma "cor da guia".
+- **Efeitos** no preenchimento (propriedade "Efeito"): **degradê** entre duas cores (linhas entremeadas, o ângulo do preenchimento
+  gira o degradê), **segue o contorno** (anéis concêntricos, com furos) e **padrões decorativos** (onda, zigue-zague, losangos e cruzado).
+- O painel de propriedades ganhou um **seletor de cor** com a paleta Brother, usado nas cores secundárias.
 
 ### Texto
 - Fontes instaladas no Windows, com **busca** (lista lida em segundo plano e só com fontes que têm letras latinas, para não pesar
@@ -167,6 +175,17 @@ Também dá para usar **Arquivo › Imagem de fundo › Inserir imagem**.
 2. **Ctrl+E**, escolha **PES** e salve. Copie o arquivo para a máquina (USB).
 3. Com o **bastidor deitado**, o arquivo sai girado 90°: prenda o tecido com o bastidor de lado (a mensagem lembra disso).
 
+### Exemplo 7: fazer um aplique
+1. Desenhe a forma do tecido com **Preencher (F)** (ou use a ferramenta **Aplique (A)** direto) e, se precisar, faça furos com **Furo (H)**.
+2. Com o preenchimento selecionado, use **Objeto › Converter em aplique**. A cor do objeto é a do acabamento em satin;
+   escolha a cor da guia e a largura do satin nas Propriedades.
+3. Exporte. Na máquina: ela borda a **linha de posicionamento** e para; coloque o tecido e aperte iniciar para a **fixação**; na parada
+   seguinte apare o tecido rente à fixação e aperte iniciar de novo para o **acabamento em satin**.
+
+### Exemplo 8: degradê, contorno e padrões
+Selecione um preenchimento e, em Propriedades › Efeito, escolha **Degradê (duas cores)** (e a segunda cor), **Segue o contorno** ou
+**Padrão decorativo** (e o padrão e o tamanho). No degradê o ângulo define o sentido: com 0° ele vai de cima para baixo.
+
 ---
 
 ## 4. Atalhos
@@ -178,7 +197,7 @@ Também dá para usar **Arquivo › Imagem de fundo › Inserir imagem**.
 | Ctrl+I | Digitalizar imagem |
 | Ctrl+Z / Ctrl+Y | Desfazer / Refazer |
 | Ctrl+C / Ctrl+V / Ctrl+D / Del | Copiar / Colar / Duplicar / Excluir |
-| V, R, C, F, H, T | Ferramentas: Selecionar, Corrido, Satin (coluna), Preencher, Furo, Texto |
+| V, R, C, F, A, H, T | Ferramentas: Selecionar, Corrido, Satin (coluna), Preencher, Aplique, Furo, Texto |
 | B | Bastidor deitado |
 | Enter / Esc / Backspace | Concluir / Cancelar / Desfazer o último ponto ao desenhar |
 | Ctrl+clique no contorno | Inserir nó · duplo-clique no nó remove · clique direito no nó alterna canto/curva |
@@ -196,7 +215,7 @@ Também dá para usar **Arquivo › Imagem de fundo › Inserir imagem**.
 src/Bordadox.Core        Núcleo sem interface: geometria, pontos, formatos PES/DST, geradores de ponto
                          (corrido, satin, tatami), objetos do desenho, sequenciador e a digitalização de imagens (Digitize/)
 src/Bordadox.App         Interface WPF: tela de desenho, editor, janelas (texto, digitalização), leitura de fontes e imagens
-tests/Bordadox.Tests     Testes do núcleo (formatos, geradores, digitalização, texto)
+tests/Bordadox.Tests     Testes do núcleo (formatos, geradores, digitalização, texto, aplique, efeitos)
 tests/Bordadox.App.Tests Testes do editor e da interface (fontes reais, imagens reais)
 tools/Bordadox.Amostras  Gera os arquivos de exemplo da pasta amostras/
 amostras/                Exemplos gerados (PES, DST, .bdx)
@@ -232,6 +251,7 @@ vetorização, esqueleto de traços finos, detecção de fotos e digitalização
   Recomenda-se bordar um teste em tecido de sobra antes de um trabalho de verdade.
 - **Satin de letras:** em colunas que seguem o traço (etapa 5d). Letras bem grossas (traço acima de 6 mm) e partes soltas (ponto do "i") usam o preenchimento por linhas. Em fontes com serifas finas, as colunas curtas das serifas se sobrepõem.
 - **Kerning** usa a tabela da fonte pelo WPF; fontes com kerning só em GPOS (ex.: Georgia) saem sem ajuste.
+- **Aplique e efeitos:** o aplique usa as trocas de linha do arquivo como paradas (a máquina pede para trocar a linha mesmo quando é a mesma cor: é só aceitar). O degradê é feito em linhas inteiras alternadas, então a mistura fica mais granulada em formas pequenas. O contorno é um espiral de anéis (deixa uma costura onde os anéis se encontram).
 - **Ligações dentro de um preenchimento** que se divide em partes contornam furos por dentro da forma (até ~12 mm); desvios maiores ainda geram um corte.
 - **Digitalização:** logos de cores chapadas e de linha fina funcionam; **fotos** viram poucas cores (com aviso). Degradês suaves
   de uma cor só (dourado metálico) viram uma cor; degradês entre cores diferentes continuam em faixas. A paleta Brother tem
@@ -249,8 +269,8 @@ Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 **Digitalização de imagens (etapa 5a):** concluída (degradê, cores Brother por CIEDE2000, estimativa de pontos, histerese e ligação de linhas que se cruzam).
 
 **Novos recursos (fase 5)**
-- **Aplique:** linha de posicionamento, de fixação e acabamento em satin.
-- **Efeitos de preenchimento:** degradê, padrões e preenchimento que segue o contorno.
+- **Aplique (etapa 5b):** feito (guia, fixação e acabamento com paradas). Falta testar na máquina: a parada usa a troca de linha do PES, e a NQ1400E pede para trocar/confirmar a linha a cada parada.
+- **Efeitos de preenchimento (etapa 5c):** feitos (degradê de duas cores, segue o contorno e quatro padrões). Ideias para depois: degradê com mais de duas cores, padrões próprios e preenchimento em espiral.
 - **Qualidade das letras (etapa 5d):** feita (satin em colunas, kerning e ligações por dentro das formas). Falta testar bordando.
 - **Mais formatos:** JEF, EXP e VP3.
 - **Ficha de produção** para impressão (cores, ordem, tamanho, número de pontos).

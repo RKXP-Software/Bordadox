@@ -10,20 +10,24 @@ namespace Bordadox.Core.Design;
 /// </summary>
 public sealed class StitchCache
 {
-    private readonly Dictionary<Guid, (string Key, List<List<Vec2>> Runs)> _items = new();
+    private readonly Dictionary<Guid, (string Key, List<StitchStep> Steps)> _items = new();
 
-    public List<List<Vec2>> Get(EmbObject obj, Vec2? from)
+    /// <summary>Passos (cor, pontos, parada) do objeto; refaz só se o objeto ou o ponto de entrada mudou.</summary>
+    public List<StitchStep> GetSteps(EmbObject obj, Vec2? from)
     {
         var key = JsonSerializer.Serialize(obj, DesignJson.Options) +
                   (from is { } f ? $"|{f.X:0.0},{f.Y:0.0}" : "|-");
-        if (_items.TryGetValue(obj.Id, out var hit) && hit.Key == key) return hit.Runs;
-        var runs = obj.GenerateRuns(from);
-        _items[obj.Id] = (key, runs);
-        return runs;
+        if (_items.TryGetValue(obj.Id, out var hit) && hit.Key == key) return hit.Steps;
+        var steps = obj.GenerateSteps(from);
+        _items[obj.Id] = (key, steps);
+        return steps;
     }
 
+    /// <summary>Todas as sequências de pontos do objeto, sem separar por passo.</summary>
+    public List<List<Vec2>> Get(EmbObject obj, Vec2? from) => GetSteps(obj, from).SelectMany(s => s.Runs).ToList();
+
     /// <summary>Último resultado gerado para o objeto (sem regenerar), para desenho e cliques.</summary>
-    public List<List<Vec2>>? Peek(Guid id) => _items.TryGetValue(id, out var hit) ? hit.Runs : null;
+    public List<List<Vec2>>? Peek(Guid id) => _items.TryGetValue(id, out var hit) ? hit.Steps.SelectMany(s => s.Runs).ToList() : null;
 
     public void Retain(IEnumerable<Guid> ids)
     {
@@ -88,46 +92,53 @@ public static class Sequencer
 
         foreach (var obj in design.Objects)
         {
-            var runs = (cache?.Get(obj, pos) ?? obj.GenerateRuns(pos)).Where(r => r.Count >= 2).ToList();
-            if (runs.Count == 0) continue;
+            // Um objeto pode ter vários passos (aplique: guia, fixação, acabamento; degradê: uma cor e depois a outra).
+            // Cada passo traz a sua cor e pode exigir uma parada da máquina (colocar o tecido, aparar).
+            var steps = cache?.GetSteps(obj, pos) ?? obj.GenerateSteps(pos);
+            foreach (var step in steps)
+            {
+                var runs = step.Runs.Where(r => r.Count >= 2).ToList();
+                if (runs.Count == 0) continue;
 
-            if (color != null && obj.Color != color)
-            {
-                TieOff();
-                if (pos != null) Add(pos.Value, StitchCommand.Trim);
-                Add(pos ?? Vec2.Zero, StitchCommand.ColorChange);
-                needTieIn = true;
-                prevPos = null;
-                pattern.Threads.Add(obj.Color);
-                // Depois da troca de cor a máquina já cortou; o próximo deslocamento é um salto simples.
-                TrimAndJump(runs[0][0], trim: false);
-            }
-            else if (color == null)
-            {
-                pattern.Threads.Add(obj.Color);
-            }
-            color = obj.Color;
-
-            foreach (var run in runs)
-            {
-                var start = run[0];
-                if (pos is not { } cur) TrimAndJump(start, trim: false);
-                else
+                // Troca de cor, ou parada com a mesma cor (a máquina para do mesmo jeito: o usuário só aperta iniciar).
+                if (color != null && (step.Color != color || step.StopBefore))
                 {
-                    double d = Vec2.Distance(cur, start);
-                    if (d > s.TrimAtMm) TrimAndJump(start, trim: true);
-                    else if (d > 1.0 && !needTieIn) TrimAndJump(start, trim: false); // salto curto, sem corte
-                    else if (d >= s.MinStitchMm) Stitch(start);
+                    TieOff();
+                    if (pos != null) Add(pos.Value, StitchCommand.Trim);
+                    Add(pos ?? Vec2.Zero, StitchCommand.ColorChange);
+                    needTieIn = true;
+                    prevPos = null;
+                    pattern.Threads.Add(step.Color);
+                    // Depois da troca de cor a máquina já cortou; o próximo deslocamento é um salto simples.
+                    TrimAndJump(runs[0][0], trim: false);
                 }
-
-                if (needTieIn)
+                else if (color == null)
                 {
-                    if (pos is not { } p0 || Vec2.Distance(p0, start) > 0.01) Add(start, StitchCommand.Jump);
-                    pos = start;
-                    TieIn(start, run.Skip(1).FirstOrDefault(p => Vec2.Distance(p, start) > 0.1, start));
-                    needTieIn = false;
+                    pattern.Threads.Add(step.Color);
                 }
-                for (int i = 1; i < run.Count; i++) Stitch(run[i]);
+                color = step.Color;
+
+                foreach (var run in runs)
+                {
+                    var start = run[0];
+                    if (pos is not { } cur) TrimAndJump(start, trim: false);
+                    else
+                    {
+                        double d = Vec2.Distance(cur, start);
+                        if (d > s.TrimAtMm) TrimAndJump(start, trim: true);
+                        else if (d > 1.0 && !needTieIn) TrimAndJump(start, trim: false); // salto curto, sem corte
+                        else if (d >= s.MinStitchMm) Stitch(start);
+                    }
+
+                    if (needTieIn)
+                    {
+                        if (pos is not { } p0 || Vec2.Distance(p0, start) > 0.01) Add(start, StitchCommand.Jump);
+                        pos = start;
+                        TieIn(start, run.Skip(1).FirstOrDefault(p => Vec2.Distance(p, start) > 0.1, start));
+                        needTieIn = false;
+                    }
+                    for (int i = 1; i < run.Count; i++) Stitch(run[i]);
+                }
             }
         }
 

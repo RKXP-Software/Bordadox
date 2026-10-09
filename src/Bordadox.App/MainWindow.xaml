@@ -97,6 +97,9 @@
                 <MenuItem Header="_Redimensionar..." Click="Scale_Click" />
                 <MenuItem Header="_Centralizar no bastidor" Click="Center_Click" />
                 <Separator />
+                <MenuItem Header="Converter em a_plique" Click="ToApplique_Click" ToolTip="Transforma o preenchimento selecionado num aplique (guia, fixação e acabamento)." />
+                <MenuItem Header="Converter em pre_enchimento" Click="ToFill_Click" />
+                <Separator />
                 <MenuItem Header="Costurar _antes" Click="SeqUp_Click" InputGestureText="Ctrl+↑" />
                 <MenuItem Header="Costurar _depois" Click="SeqDown_Click" InputGestureText="Ctrl+↓" />
             </MenuItem>
@@ -201,6 +204,9 @@
                 </RadioButton>
                 <RadioButton x:Name="ToolFill" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Fill" ToolTip="Preenchimento tatami/satin (F)">
                     <StackPanel><TextBlock Text="▦" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Preencher (F)" HorizontalAlignment="Center" /></StackPanel>
+                </RadioButton>
+                <RadioButton x:Name="ToolApplique" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Applique" ToolTip="Aplique: guia, fixação do tecido e acabamento em satin, com paradas (A)">
+                    <StackPanel><TextBlock Text="◧" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Aplique (A)" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolHole" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Hole" ToolTip="Furo no preenchimento selecionado (H)">
                     <StackPanel><TextBlock Text="◌" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Furo (H)" HorizontalAlignment="Center" /></StackPanel>

@@ -3,9 +3,11 @@ using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Bordadox.Core.Design;
+using Bordadox.Core.Stitches;
 
 namespace Bordadox.App.Controls;
 
@@ -45,7 +47,7 @@ public sealed class PropertyEditor : ContentControl
         var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.CanWrite && p.CanRead && p.GetCustomAttribute<BrowsableAttribute>()?.Browsable != false)
             .Where(p => p.PropertyType == typeof(double) || p.PropertyType == typeof(bool) ||
-                        p.PropertyType == typeof(string) || p.PropertyType.IsEnum)
+                        p.PropertyType == typeof(string) || p.PropertyType == typeof(ThreadColor) || p.PropertyType.IsEnum)
             .GroupBy(p => p.GetCustomAttribute<CategoryAttribute>()?.Category ?? "Geral");
 
         foreach (var group in props)
@@ -104,7 +106,7 @@ public sealed class PropertyEditor : ContentControl
 
         var grid = new Grid { Margin = new Thickness(4, 2, 4, 2) };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(prop.PropertyType == typeof(string) ? 120 : 80) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(prop.PropertyType == typeof(string) || prop.PropertyType == typeof(ThreadColor) ? 120 : 80) });
         var text = new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 6, 0) };
         grid.Children.Add(text);
 
@@ -123,6 +125,10 @@ public sealed class PropertyEditor : ContentControl
                 if (combo.SelectedItem is ComboBoxItem { Tag: { } v }) Apply(prop, v);
             };
             editor = combo;
+        }
+        else if (prop.PropertyType == typeof(ThreadColor))
+        {
+            editor = ColorEditor(prop, mixed ? null : (ThreadColor?)values[0]);
         }
         else if (prop.PropertyType == typeof(double))
         {
@@ -174,6 +180,53 @@ public sealed class PropertyEditor : ContentControl
         Grid.SetColumn(editor, 1);
         grid.Children.Add(editor);
         return grid;
+    }
+
+    private static FrameworkElement ColorChip(ThreadColor? c) => new StackPanel
+    {
+        Orientation = Orientation.Horizontal,
+        Children =
+        {
+            new System.Windows.Shapes.Ellipse
+            {
+                Width = 14, Height = 14, Margin = new Thickness(0, 0, 5, 0), Stroke = Brushes.Gray, StrokeThickness = 1,
+                Fill = c is { } k ? new SolidColorBrush(Color.FromRgb(k.R, k.G, k.B)) : Brushes.Transparent,
+            },
+            new TextBlock { Text = c?.Name ?? "(vários)", TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center },
+        },
+    };
+
+    /// <summary>Botão com a cor atual que abre a paleta Brother (64 linhas) para escolher outra.</summary>
+    private FrameworkElement ColorEditor(PropertyInfo prop, ThreadColor? current)
+    {
+        var button = new Button { HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(4, 2, 4, 2), Content = ColorChip(current) };
+        var wrap = new WrapPanel { Width = 8 * 26 };
+        var popup = new Popup
+        {
+            PlacementTarget = button, Placement = PlacementMode.Bottom, StaysOpen = false, AllowsTransparency = true,
+            Child = new Border
+            {
+                Background = Brushes.White, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1), Padding = new Thickness(4), Child = wrap,
+            },
+        };
+        for (int i = 1; i < BrotherPalette.Colors.Count; i++)
+        {
+            var c = BrotherPalette.Colors[i];
+            var chip = new Border
+            {
+                Width = 22, Height = 22, Margin = new Thickness(2), CornerRadius = new CornerRadius(11), BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1),
+                Background = new SolidColorBrush(Color.FromRgb(c.R, c.G, c.B)), ToolTip = c.Name, Cursor = Cursors.Hand,
+            };
+            chip.MouseLeftButtonUp += (_, _) =>
+            {
+                popup.IsOpen = false;
+                button.Content = ColorChip(c);
+                Apply(prop, c);
+            };
+            wrap.Children.Add(chip);
+        }
+        button.Click += (_, _) => popup.IsOpen = true;
+        return button;
     }
 
     private void Apply(PropertyInfo prop, object value)

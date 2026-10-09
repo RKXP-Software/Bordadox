@@ -223,7 +223,7 @@ public partial class MainWindow : Window
     private void OnToolChanged()
     {
         var tool = _editor.Tool;
-        foreach (var rb in new[] { ToolSelect, ToolRun, ToolSatin, ToolFill, ToolHole, ToolText })
+        foreach (var rb in new[] { ToolSelect, ToolRun, ToolSatin, ToolFill, ToolApplique, ToolHole, ToolText })
             rb.IsChecked = (string)rb.Tag == tool.ToString();
         Canvas.ToolCursor = tool == EditorTool.Select ? null : Cursors.Cross;
         HintText.Text = _editor.ToolHint;
@@ -504,6 +504,16 @@ public partial class MainWindow : Window
     private void MirrorH_Click(object sender, RoutedEventArgs e) { _editor.Mirror(true); OnSelectionChanged(); }
     private void MirrorV_Click(object sender, RoutedEventArgs e) { _editor.Mirror(false); OnSelectionChanged(); }
     private void Center_Click(object sender, RoutedEventArgs e) => _editor.CenterInHoop();
+    private void ToApplique_Click(object sender, RoutedEventArgs e) => ConvertShapes(true);
+    private void ToFill_Click(object sender, RoutedEventArgs e) => ConvertShapes(false);
+
+    private void ConvertShapes(bool toApplique)
+    {
+        int n = _editor.ConvertShapes(toApplique);
+        if (n == 0) ShowMessage(toApplique ? "Selecione um preenchimento para converter em aplique." : "Selecione um aplique para converter em preenchimento.");
+        else OnSelectionChanged();
+    }
+
     private void SeqUp_Click(object sender, RoutedEventArgs e) => _editor.MoveInSequence(-1);
     private void SeqDown_Click(object sender, RoutedEventArgs e) => _editor.MoveInSequence(1);
 
@@ -608,6 +618,7 @@ public partial class MainWindow : Window
             case Key.R: _editor.Tool = EditorTool.Run; break;
             case Key.C: _editor.Tool = EditorTool.Satin; break;
             case Key.F: _editor.Tool = EditorTool.Fill; break;
+            case Key.A: _editor.Tool = EditorTool.Applique; break;
             case Key.H: _editor.Tool = EditorTool.Hole; break;
             case Key.T: _editor.Tool = EditorTool.Text; break;
             case Key.B: RotateHoop_Click(this, e); break;

@@ -79,6 +79,24 @@ Limitações conhecidas das letras:
   pequenas (abaixo de uns 5 mm) o tatami continua mais seguro.
 - Os pontos de ligação entre colunas ficam por cima do satin (só são cobertos quando caem sob a coluna seguinte).
 
+### Etapa 5b — Aplique ✅ (aguardando teste na máquina)
+- **Passos por objeto:** `EmbObject.GenerateSteps` devolve vários `StitchStep` (cor, pontos e parada opcional). O sequenciador troca de
+  linha entre os passos, e com `StopBefore` para a máquina mesmo quando a cor é a mesma (entrada repetida na lista de linhas do PES).
+- **`AppliqueObject`** (forma fechada com furos, como o preenchimento; base comum `ShapeObject`): 1) linha de posicionamento (corrida
+  no contorno), 2) fixação do tecido (zigue-zague ou corrido) com parada antes, 3) acabamento em satin ao longo do contorno
+  (`OutlineSatin`: pares perpendiculares, quinas em leque, largura e densidade ajustáveis) com parada antes.
+- Ferramenta **Aplique (A)** e **Objeto › Converter em aplique / preenchimento** (mantém contorno, furos, nome, cor e ordem).
+- Painel de propriedades com **seletor de cor** (paleta Brother) para a cor da guia.
+- Pendente: validar numa bordada real como a NQ1400E trata as paradas (o PES só tem "troca de linha").
+
+### Etapa 5c — Efeitos de preenchimento ✅
+- **Degradê** (`FillEffect.Gradient`): as linhas do tatami são divididas entre duas cores por difusão de erro (proporção contínua
+  de uma ponta à outra); duas camadas, uma troca de linha. O ângulo do preenchimento gira o degradê; "inverter" troca o sentido.
+- **Segue o contorno** (`ContourFill`, Clipper2): anéis concêntricos para dentro (e para fora dos furos), costurados do externo ao interno
+  como um espiral contínuo; um anel a meio passo fecha a fresta onde os anéis se encontram.
+- **Padrões decorativos** (`PatternFill`): onda, zigue-zague, losangos (linhas vizinhas em oposição de fase) e cruzado (duas grades).
+- `FillGenerator` ganhou `KeepRow` (só certas linhas) e `Rows()` (as linhas de costura de uma forma) para os efeitos.
+
 ### Pedidos do usuário ainda na fila
 - ✅ **Identidade visual (ícone):** bastidor com um X sendo bordado, aprovado pelo usuário; gerado por `build/gerar-icone.ps1` (16 a 256 px, com versão simplificada para tamanhos pequenos). Pendente: tela de abertura e logo para documentos.
 - ✅ **Instalador e versão portátil:** `build/publicar.ps1` gera `dist/Bordadox-<versão>-setup.exe` (Inno Setup, por usuário, sem administrador, associa .bdx e "Abrir com" .pes/.dst) e `dist/Bordadox-<versão>-portable.zip`, ambos autocontidos (.NET 10 embutido). Falta assinatura de código.
@@ -89,7 +107,9 @@ Limitações conhecidas das letras:
 
 ### Demais etapas
 15. Digitalização automática de imagem (ver 5a)
-16. Aplique, efeitos de preenchimento, formatos JEF/EXP/VP3, ficha de produção
+16. ✅ Aplique (5b) e efeitos de preenchimento (5c)
+17. Formatos JEF/EXP/VP3 e ficha de produção (5e)
+18. Acabamento do produto: tela de abertura, logo para documentos, assinatura do instalador
 
 ## Regra de trabalho
 Ao final de cada fase: compilar, rodar os testes e mostrar o resultado antes de seguir.

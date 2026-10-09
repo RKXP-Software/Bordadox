@@ -22,6 +22,9 @@ public sealed class EditorHintAttribute(string kind) : Attribute
     public string Kind { get; } = kind;
 }
 
+/// <summary>Um trecho do bordado de um objeto: sequências de pontos numa cor, com parada opcional da máquina antes (trocar linha, colocar o tecido).</summary>
+public sealed record StitchStep(ThreadColor Color, List<List<Vec2>> Runs, bool StopBefore = false);
+
 /// <summary>Objeto editável do desenho. Gera pontos a partir dos parâmetros (digitalização "viva").</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "tipo")]
 [JsonDerivedType(typeof(RunObject), "corrido")]
@@ -29,6 +32,7 @@ public sealed class EditorHintAttribute(string kind) : Attribute
 [JsonDerivedType(typeof(FillObject), "preenchimento")]
 [JsonDerivedType(typeof(StitchBlockObject), "pontos")]
 [JsonDerivedType(typeof(TextObject), "texto")]
+[JsonDerivedType(typeof(AppliqueObject), "aplique")]
 public abstract class EmbObject
 {
     [Browsable(false)]
@@ -58,6 +62,12 @@ public abstract class EmbObject
     /// <summary>Gera as sequências contínuas de pontos (mm). Entre elas, o sequenciador decide salto/corte.</summary>
     /// <param name="from">Posição atual da agulha, para escolher um início próximo (quando o objeto permite).</param>
     public abstract List<List<Vec2>> GenerateRuns(Vec2? from);
+
+    /// <summary>
+    /// Passos do objeto, cada um com a sua cor e, se preciso, uma parada da máquina antes dele. A maioria dos objetos tem um passo só
+    /// (as sequências de <see cref="GenerateRuns"/> na cor do objeto); aplique e degradê têm vários.
+    /// </summary>
+    public virtual List<StitchStep> GenerateSteps(Vec2? from) => new() { new StitchStep(Color, GenerateRuns(from)) };
 
     /// <summary>Contornos achatados para desenhar seleção e testar cliques.</summary>
     public abstract List<List<Vec2>> Outlines();
