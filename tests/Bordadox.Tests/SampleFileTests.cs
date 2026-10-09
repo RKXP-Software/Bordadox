@@ -17,17 +17,20 @@ public class SampleFileTests(ITestOutputHelper output)
         }
     }
 
-    public static IEnumerable<object[]> Files() =>
-        Directory.Exists(SamplesDir)
-            ? Directory.EnumerateFiles(SamplesDir)
-                .Where(f => EmbroideryFormats.ForFile(f) != null)
-                .Select(f => new object[] { Path.GetFileName(f) })
-            : Array.Empty<object[]>();
+    /// <summary>Arquivos de amostras/ (a pasta é só local, não vai para o repositório). Sem nenhum, devolve uma linha vazia e o teste termina logo.</summary>
+    public static IEnumerable<object[]> Files()
+    {
+        var found = Directory.Exists(SamplesDir)
+            ? Directory.EnumerateFiles(SamplesDir).Where(f => EmbroideryFormats.ForFile(f) != null).Select(f => new object[] { Path.GetFileName(f) }).ToList()
+            : new List<object[]>();
+        return found.Count > 0 ? found : new List<object[]> { new object[] { "" } };
+    }
 
     [Theory]
     [MemberData(nameof(Files))]
     public void ReadsSampleFile(string name)
     {
+        if (name.Length == 0) return;   // sem amostras nesta máquina
         var p = EmbroideryFormats.ReadFile(Path.Combine(SamplesDir, name));
         var b = p.Bounds();
         double w = (b.MaxX - b.MinX) / 10.0, h = (b.MaxY - b.MinY) / 10.0;

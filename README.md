@@ -98,18 +98,21 @@ cd Bordadox
 dotnet run --project src/Bordadox.App
 ```
 
+A pasta `amostras/` **não vai para o repositório** (está no `.gitignore`): ela guarda arquivos de teste e exemplos só na sua máquina.
+Para criá-la com os exemplos do próprio projeto (PES, DST e projetos), e rodar os testes:
+
+```bash
+dotnet run --project tools/Bordadox.Amostras -- amostras
+dotnet test
+```
+
 Abrir um arquivo direto (também funciona "Abrir com" no Explorer):
 
 ```bash
 dotnet run --project src/Bordadox.App -- amostras/demo_editor.bdx
 ```
 
-Gerar os arquivos de exemplo (PES, DST e projetos) e rodar os testes:
-
-```bash
-dotnet run --project tools/Bordadox.Amostras -- amostras
-dotnet test
-```
+Sem a pasta `amostras/`, os testes que usam arquivos e imagens de exemplo terminam sem checar nada (não falham).
 
 ### Instalar sem o SDK (instalador e versão portátil)
 
@@ -226,8 +229,8 @@ src/Bordadox.Core        Núcleo sem interface: geometria, pontos, formatos PES/
 src/Bordadox.App         Interface WPF: tela de desenho, editor, janelas (texto, digitalização), leitura de fontes e imagens
 tests/Bordadox.Tests     Testes do núcleo (formatos, geradores, digitalização, texto, aplique, efeitos)
 tests/Bordadox.App.Tests Testes do editor e da interface (fontes reais, imagens reais)
-tools/Bordadox.Amostras  Gera os arquivos de exemplo da pasta amostras/
-amostras/                Exemplos gerados (PES, DST, .bdx)
+tools/Bordadox.Amostras  Gera os arquivos de exemplo da pasta local amostras/
+amostras/                Só local (fora do Git): exemplos gerados e arquivos de teste
 build/                   Scripts de empacotamento: publicar.ps1, instalador.iss (Inno Setup), gerar-icone.ps1
 PLANO.md                 Plano por fases e andamento
 ```
