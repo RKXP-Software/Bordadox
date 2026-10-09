@@ -37,11 +37,6 @@ Melhorias conhecidas para depois:
     - Lista de fontes em segundo plano (nomes primeiro, conferência depois) e virtualizada, para quem tem milhares de fontes
     - Letras são preenchimentos (scanline) com furos; os trechos de uma mesma letra se ligam por dentro, sem cortes
 
-Limitações conhecidas das letras:
-- O satin das letras é por linhas de varredura (ângulo fixo), não por colunas que seguem o traço como no Wilcom
-  (letras pequenas, até ~5 mm, ficam boas; letras grandes ficam melhores como tatami)
-- Sem kerning entre pares de letras (usa só a largura de cada letra)
-- Ainda há cortes nos saltos que atravessam o "buraco" de letras como o, a, B
 
 ## Fase 5 — Avançado
 
@@ -67,13 +62,30 @@ A janela de digitalização tem zoom na prévia (roda do mouse, arrastar, botõe
 4. ✅ Histerese: um fio que oscila em torno de 1,2 mm fica todo como linha (trecho grosso só vale se tiver uma parte claramente grossa).
 5. ✅ Cruzamentos e bifurcações de linhas finas: `Skeleton.JoinAtJunctions` liga os braços que seguem em frente (2 linhas inteiras em vez de 4 pedaços), e o nó do cruzamento deixou de virar um remendo de preenchimento. Borboleta: 84 → 46 objetos, 54 → 37 cortes.
 
+
+### Etapa 5d — Qualidade das letras ✅ (aguardando teste do usuário)
+- **Satin em colunas** (`ColumnSatin.cs`): a linha central de cada traço vem do esqueleto da letra e os pontos cruzam o traço
+  perpendicularmente, com a largura medida por raios até os dois lados do contorno. Quinas vivas (A, V, N, Z, L, E...) e
+  cruzamentos viram colunas separadas que se sobrepõem, sem leque de pontos. Letras muito grossas (traço acima de 6 mm), partes
+  soltas como o ponto do "i" e qualquer forma cuja cobertura não fecha caem para o preenchimento de antes ("Satin em colunas"
+  desligável nas propriedades do texto). As colunas ficam em cache por letra: mover ou girar o texto não recalcula nada.
+- **Kerning** com a tabela da própria fonte (medido pelo motor de texto do WPF; fontes que só têm kerning GPOS, como a Georgia,
+  não ganham ajuste). Opção "Kerning" nas propriedades do texto.
+- **Menos cortes**: `InsideRouter` (A* numa grade) liga os trechos de um preenchimento contornando furos por dentro da forma, em vez
+  de saltar e cortar. Vale para letras e para qualquer preenchimento (logos). Cortes nos logos de teste: 112 → 90, 29 → 18, 52 → 43.
+
+Limitações conhecidas das letras:
+- Fontes com serifas finas e muito contraste (tipo Times, Didone) ainda saem com algumas colunas curtas sobrepostas; em letras muito
+  pequenas (abaixo de uns 5 mm) o tatami continua mais seguro.
+- Os pontos de ligação entre colunas ficam por cima do satin (só são cobertos quando caem sob a coluna seguinte).
+
 ### Pedidos do usuário ainda na fila
 - ✅ **Identidade visual (ícone):** bastidor com um X sendo bordado, aprovado pelo usuário; gerado por `build/gerar-icone.ps1` (16 a 256 px, com versão simplificada para tamanhos pequenos). Pendente: tela de abertura e logo para documentos.
 - ✅ **Instalador e versão portátil:** `build/publicar.ps1` gera `dist/Bordadox-<versão>-setup.exe` (Inno Setup, por usuário, sem administrador, associa .bdx e "Abrir com" .pes/.dst) e `dist/Bordadox-<versão>-portable.zip`, ambos autocontidos (.NET 10 embutido). Falta assinatura de código.
 - ✅ **Digitalizar imagem só como fundo** (sem gerar bordado), para desenhar por cima: caixa "Só usar como fundo" na janela de digitalização; o menu "Imagem de fundo" também aceita SVG.
 - ✅ **Régua em mm** (Exibir › Régua): zero no centro do bastidor, marcador do cursor; a escolha é lembrada.
 - ✅ **Satin x tatami mais distintos:** o satin tem ângulo automático (pontos cruzam a largura) e o tatami tem penetrações escalonadas também em formas estreitas.
-- **Satin de verdade para letras e traços estreitos** (coluna que segue o traço, via esqueleto): ainda pendente; depende do esqueleto (5a, item 1).
+- ✅ **Satin de verdade para letras** (coluna que segue o traço): feito na etapa 5d.
 
 ### Demais etapas
 15. Digitalização automática de imagem (ver 5a)

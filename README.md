@@ -230,11 +230,9 @@ vetorização, esqueleto de traços finos, detecção de fotos e digitalização
 - **Validado na máquina:** o arquivo PES (formato, cores, cortes, miniatura). O restante (texto, logos digitalizados, bastidor
   deitado, satin automático) foi conferido em tela e por testes automáticos, mas ainda não bordado fisicamente.
   Recomenda-se bordar um teste em tecido de sobra antes de um trabalho de verdade.
-- **Satin de letras:** é por linhas com ângulo automático por letra, não por colunas que acompanham o traço como no Wilcom.
-  Em letras pequenas (até ~5 mm) fica bom; em letras grandes, o tatami costuma ficar melhor.
-- **Sem kerning** entre pares de letras.
-- **Deslocamentos dentro de um preenchimento** que se divide em partes (letras como o, a, B) ainda geram cortes; o ideal seria
-  caminhar por baixo do preenchimento.
+- **Satin de letras:** em colunas que seguem o traço (etapa 5d). Letras bem grossas (traço acima de 6 mm) e partes soltas (ponto do "i") usam o preenchimento por linhas. Em fontes com serifas finas, as colunas curtas das serifas se sobrepõem.
+- **Kerning** usa a tabela da fonte pelo WPF; fontes com kerning só em GPOS (ex.: Georgia) saem sem ajuste.
+- **Ligações dentro de um preenchimento** que se divide em partes contornam furos por dentro da forma (até ~12 mm); desvios maiores ainda geram um corte.
 - **Digitalização:** logos de cores chapadas e de linha fina funcionam; **fotos** viram poucas cores (com aviso). Degradês suaves
   de uma cor só (dourado metálico) viram uma cor; degradês entre cores diferentes continuam em faixas. A paleta Brother tem
   poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
@@ -253,7 +251,7 @@ Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 **Novos recursos (fase 5)**
 - **Aplique:** linha de posicionamento, de fixação e acabamento em satin.
 - **Efeitos de preenchimento:** degradê, padrões e preenchimento que segue o contorno.
-- **Qualidade das letras:** satin por colunas (acompanhando o traço), kerning e menos cortes por caminho escondido sob o preenchimento.
+- **Qualidade das letras (etapa 5d):** feita (satin em colunas, kerning e ligações por dentro das formas). Falta testar bordando.
 - **Mais formatos:** JEF, EXP e VP3.
 - **Ficha de produção** para impressão (cores, ordem, tamanho, número de pontos).
 

@@ -76,6 +76,7 @@ public static class FillGenerator
         double maxConnectMm = 8, double stitchLength = 3)
     {
         var result = new List<List<Vec2>>();
+        InsideRouter? router = null;   // criado só se algum trecho precisar contornar um furo
         foreach (var run in runs)
         {
             if (run.Count == 0) continue;
@@ -91,6 +92,25 @@ public static class FillGenerator
                     for (int k = 1; k < n; k++) last.Add(Vec2.Lerp(a, b, (double)k / n));
                     last.AddRange(run);
                     continue;
+                }
+                // Reta direta sai da forma (há um furo no meio): contorna por dentro, se o desvio for curto.
+                if (d <= maxConnectMm * 1.5 && d > 0.5)
+                {
+                    router ??= new InsideRouter(contours);
+                    var way = router.Route(a, b, maxConnectMm * 1.5);
+                    if (way != null)
+                    {
+                        var from = a;
+                        foreach (var p in way.Append(b))
+                        {
+                            double seg = Vec2.Distance(from, p);
+                            int parts = Math.Max(1, (int)Math.Ceiling(seg / stitchLength));
+                            for (int k = 1; k <= parts; k++) if (!(k == parts && p == b)) last.Add(Vec2.Lerp(from, p, (double)k / parts));
+                            from = p;
+                        }
+                        last.AddRange(run);
+                        continue;
+                    }
                 }
             }
             result.Add(run.ToList());

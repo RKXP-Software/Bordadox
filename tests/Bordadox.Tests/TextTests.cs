@@ -13,6 +13,9 @@ public sealed class FakeGlyphProvider : IGlyphProvider
 
     public double CapHeight(string family, bool bold, bool italic) => Cap;
 
+    /// <summary>Kerning de teste: "AV" se aproxima 0,1 em.</summary>
+    public double Kerning(string family, bool bold, bool italic, int left, int right) => left == (int)'A' && right == (int)'V' ? -0.1 : 0;
+
     public Glyph? GetGlyph(string family, bool bold, bool italic, int codePoint)
     {
         if (codePoint == '?') return null; // caractere inexistente na fonte

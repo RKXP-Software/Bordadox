@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using Bordadox.Core.Geometry;
@@ -16,6 +17,7 @@ public sealed class WpfGlyphProvider : IGlyphProvider
 
     private readonly Dictionary<(string, bool, bool), GlyphTypeface?> _faces = new();
     private readonly Dictionary<(string, bool, bool, int), Glyph?> _glyphs = new();
+    private readonly Dictionary<(string, bool, bool, int, int), double> _kerning = new();
     private readonly object _lock = new();
 
     /// <summary>
@@ -44,6 +46,33 @@ public sealed class WpfGlyphProvider : IGlyphProvider
             var glyph = Build(Face(family, bold, italic), codePoint);
             _glyphs[key] = glyph;
             return glyph;
+        }
+    }
+
+    /// <summary>
+    /// Kerning de um par: a largura do par menos a soma das larguras das letras sozinhas, medida pelo motor de texto do WPF
+    /// (que aplica a tabela de kerning da fonte). Em em. Diferenças menores que 0,002 em são ruído e valem zero.
+    /// </summary>
+    public double Kerning(string family, bool bold, bool italic, int left, int right)
+    {
+        lock (_lock)
+        {
+            var key = (family, bold, italic, left, right);
+            if (_kerning.TryGetValue(key, out var cached)) return cached;
+            double k = 0;
+            try
+            {
+                var typeface = new Typeface(new FontFamily(family),
+                    italic ? FontStyles.Italic : FontStyles.Normal, bold ? FontWeights.Bold : FontWeights.Normal, FontStretches.Normal);
+                double Width(string s) => new FormattedText(s, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, RefEm,
+                    Brushes.Black, 1.0).WidthIncludingTrailingWhitespace;
+                string l = char.ConvertFromUtf32(left), r = char.ConvertFromUtf32(right);
+                k = (Width(l + r) - Width(l) - Width(r)) / RefEm;
+                if (Math.Abs(k) < 0.002 || Math.Abs(k) > 0.4) k = 0;
+            }
+            catch (Exception) { k = 0; }
+            _kerning[key] = k;
+            return k;
         }
     }
 

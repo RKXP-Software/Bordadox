@@ -16,6 +16,9 @@ public interface IGlyphProvider
 
     /// <summary>Contornos da letra, ou null se a fonte não tem esse caractere.</summary>
     Glyph? GetGlyph(string family, bool bold, bool italic, int codePoint);
+
+    /// <summary>Ajuste de kerning entre duas letras seguidas, em em (negativo aproxima). Zero se a fonte não tem.</summary>
+    double Kerning(string family, bool bold, bool italic, int left, int right) => 0;
 }
 
 public static class GlyphService
