@@ -12,6 +12,18 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 - **Máquina:** Brother NQ1400E. Bastidores: 100 × 100, 130 × 180 e 160 × 260 mm.
 - **Plano e andamento detalhados:** [PLANO.md](PLANO.md).
 
+## Capturas de tela
+
+![Editor com aplique, degradê, contorno e padrões decorativos](docs/img/editor-efeitos.png)
+*Editor: aplique, degradê, preenchimento que segue o contorno e padrões decorativos, com sequência de costura e paleta Brother.*
+
+| Texto com fontes do Windows | Ampliação com pontos reais |
+|---|---|
+| ![Texto em várias fontes e cores](docs/img/texto.png) | ![Zoom nos pontos de preenchimento](docs/img/zoom-pontos.png) |
+
+![Ficha de produção](docs/img/ficha-producao.png)
+*Ficha de produção: prévia, tamanho, bastidor, pontos, cortes, tempo estimado e sequência de linhas.*
+
 ---
 
 ## Sumário
