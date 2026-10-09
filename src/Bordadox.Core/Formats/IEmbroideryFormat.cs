@@ -18,6 +18,9 @@ public static class EmbroideryFormats
     {
         new PesFormat(),
         new DstFormat(),
+        new ExpFormat(),
+        new JefFormat(),
+        new Vp3Format(),
     };
 
     public static IEmbroideryFormat? ForFile(string path)

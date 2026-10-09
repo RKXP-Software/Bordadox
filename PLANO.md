@@ -97,6 +97,18 @@ Limitações conhecidas das letras:
 - **Padrões decorativos** (`PatternFill`): onda, zigue-zague, losangos (linhas vizinhas em oposição de fase) e cruzado (duas grades).
 - `FillGenerator` ganhou `KeepRow` (só certas linhas) e `Rows()` (as linhas de costura de uma forma) para os efeitos.
 
+### Etapa 5e — Formatos e ficha de produção ✅ (JEF e VP3 sem validação externa)
+- **EXP** (Melco): sem cabeçalho nem cores; registros (dx, -dy), salto `80 04`, troca de linha `80 01`, corte `80 80 07 00`; movimento máximo ±127.
+- **JEF** (Janome): cabeçalho de 116 bytes (deslocamento, data, linhas, pontos, bastidor e folgas de 4 bastidores), lista de linhas pela paleta de
+  78 cores Janome (CIEDE2000; duas linhas diferentes no mesmo índice usam a segunda mais próxima), corte como 3 saltos nulos, fim `80 10`.
+- **VP3** (Pfaff/Viking): big-endian com blocos que guardam o próprio tamanho (arquivo, desenho, cor, pontos), cores RGB com nome, forma longa
+  para movimentos acima de ±127, corte `80 03`. Sem "salto": o salto vira corte e o movimento entra no próximo ponto; na leitura, o primeiro
+  ponto depois de um corte volta como salto + ponto.
+- As especificações vieram do código aberto do pyembroidery (consultado pela web); conferido só por testes de ida e volta e de estrutura de bytes.
+- **Ficha de produção** (`ProductionSheet`): página HTML autocontida (prévia em PNG embutida) com tamanho, bastidor, pontos, cortes,
+  tempo estimado (700 pontos/min, +30 s por troca, +6 s por corte), sequência de linhas com as paradas do aplique explicadas e lista de objetos.
+  Arquivo › Ficha de produção; imprime ou salva em PDF pelo navegador.
+
 ### Pedidos do usuário ainda na fila
 - ✅ **Identidade visual (ícone):** bastidor com um X sendo bordado, aprovado pelo usuário; gerado por `build/gerar-icone.ps1` (16 a 256 px, com versão simplificada para tamanhos pequenos). Pendente: tela de abertura e logo para documentos.
 - ✅ **Instalador e versão portátil:** `build/publicar.ps1` gera `dist/Bordadox-<versão>-setup.exe` (Inno Setup, por usuário, sem administrador, associa .bdx e "Abrir com" .pes/.dst) e `dist/Bordadox-<versão>-portable.zip`, ambos autocontidos (.NET 10 embutido). Falta assinatura de código.
@@ -108,7 +120,7 @@ Limitações conhecidas das letras:
 ### Demais etapas
 15. Digitalização automática de imagem (ver 5a)
 16. ✅ Aplique (5b) e efeitos de preenchimento (5c)
-17. Formatos JEF/EXP/VP3 e ficha de produção (5e)
+17. ✅ Formatos JEF/EXP/VP3 e ficha de produção (5e)
 18. Acabamento do produto: tela de abertura, logo para documentos, assinatura do instalador
 
 ## Regra de trabalho

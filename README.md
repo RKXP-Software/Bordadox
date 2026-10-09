@@ -2,7 +2,7 @@
 
 Programa de **digitalização de bordados** para Windows, feito do zero e pensado para a **Brother NQ1400E**.
 Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows, transforma um logo
-(PNG, JPG, SVG) em bordado e exporta em **PES** (Brother) e **DST** (Tajima).
+(PNG, JPG, SVG) em bordado e exporta em **PES** (Brother), **DST** (Tajima), **EXP** (Melco), **JEF** (Janome) e **VP3** (Pfaff/Viking), além de gerar uma ficha de produção para imprimir.
 
 > Projeto de uso pessoal. Não tem relação com a Wilcom, a Brother ou qualquer outro fabricante e **não** usa código,
 > recursos ou engenharia reversa de nenhum software comercial: tudo foi escrito a partir de formatos de arquivo documentados
@@ -31,6 +31,12 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 ### Arquivos e máquina
 - **Abrir e gravar PES e DST.** O PES é gravado no formato que a Brother lê (cabeçalho PES + seção PEC com as miniaturas do visor),
   com a paleta de 64 linhas Brother. O DST não guarda cores (abre com cores de contraste).
+- **EXP, JEF e VP3** (etapa 5e): leitura e gravação. O EXP não guarda cores. O JEF usa a paleta de 78 linhas Janome (a mais próxima, por CIEDE2000),
+  com o corte gravado como três saltos nulos. O VP3 guarda as cores em RGB com nome; como não tem "salto", cada salto vira corte e o movimento
+  entra no ponto seguinte. **Só o PES foi validado numa máquina**; os outros três foram escritos pela especificação do formato e conferidos por
+  testes de ida e volta e de estrutura de bytes, sem software ou máquina da marca para abrir o arquivo.
+- **Ficha de produção** (Arquivo › Ficha de produção): uma página HTML com a prévia colorida, tamanho, bastidor, pontos, cortes, tempo estimado,
+  a sequência de linhas (com as paradas do aplique explicadas) e a lista de objetos. Abre no navegador; use Imprimir (Ctrl+P) para imprimir ou salvar como PDF.
   O arquivo gerado foi **testado e aceito pela NQ1400E** (abre, mostra miniatura e cores, corta entre as cores).
 - **Projeto editável `.bdx`** (JSON legível): objetos, bastidor, configurações e imagem de fundo ficam no arquivo.
 - **Bastidores da NQ1400E** (100×100, 130×180, 160×260) e **bastidor deitado**: a área de trabalho gira, e na exportação o desenho
@@ -139,7 +145,7 @@ O ícone (bastidor com um X sendo bordado pela agulha) é gerado por `build/gera
 3. Com **V** (Selecionar), clique na forma: o painel **Propriedades** permite trocar tatami/satin, ângulo e densidade.
 4. Para um furo: selecione o preenchimento, pressione **H** e desenhe o contorno do furo.
 5. Para uma coluna satin: pressione **C** e clique **alternando os dois lados** da coluna (A, B, A, B...).
-6. **Ctrl+S** salva o projeto (`.bdx`). **Ctrl+E** exporta para a máquina (PES ou DST).
+6. **Ctrl+S** salva o projeto (`.bdx`). **Ctrl+E** exporta para a máquina (PES, DST, EXP, JEF ou VP3).
 
 Projeto de exemplo com preenchimento com furo, preenchimento satin, coluna satin curva e contorno triplo:
 `amostras/demo_editor.bdx`.
@@ -193,7 +199,7 @@ Selecione um preenchimento e, em Propriedades › Efeito, escolha **Degradê (du
 | Atalho | Ação |
 |---|---|
 | Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S | Novo / Abrir / Salvar projeto / Salvar como |
-| Ctrl+E | Exportar para a máquina (PES/DST) |
+| Ctrl+E | Exportar para a máquina (PES, DST, EXP, JEF, VP3) |
 | Ctrl+I | Digitalizar imagem |
 | Ctrl+Z / Ctrl+Y | Desfazer / Refazer |
 | Ctrl+C / Ctrl+V / Ctrl+D / Del | Copiar / Colar / Duplicar / Excluir |
@@ -212,7 +218,7 @@ Selecione um preenchimento e, em Propriedades › Efeito, escolha **Degradê (du
 ## 5. Como o projeto é organizado
 
 ```
-src/Bordadox.Core        Núcleo sem interface: geometria, pontos, formatos PES/DST, geradores de ponto
+src/Bordadox.Core        Núcleo sem interface: geometria, pontos, formatos PES/DST/EXP/JEF/VP3, ficha de produção, geradores de ponto
                          (corrido, satin, tatami), objetos do desenho, sequenciador e a digitalização de imagens (Digitize/)
 src/Bordadox.App         Interface WPF: tela de desenho, editor, janelas (texto, digitalização), leitura de fontes e imagens
 tests/Bordadox.Tests     Testes do núcleo (formatos, geradores, digitalização, texto, aplique, efeitos)
@@ -257,7 +263,7 @@ vetorização, esqueleto de traços finos, detecção de fotos e digitalização
   de uma cor só (dourado metálico) viram uma cor; degradês entre cores diferentes continuam em faixas. A paleta Brother tem
   poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
 - **A estimativa de pontos** da janela é aproximada (erro de uns 10% nos logos de teste; o valor final, depois de gerar, é exato).
-- Formatos suportados apenas **PES e DST**.
+- Formatos: **PES** (validado na máquina), **DST**, **EXP**, **JEF** e **VP3** (estes quatro sem validação em máquina ou software da marca; o PES é o recomendado para a NQ1400E).
 - Somente **Windows** (WPF).
 
 ---
@@ -272,8 +278,7 @@ Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 - **Aplique (etapa 5b):** feito (guia, fixação e acabamento com paradas). Falta testar na máquina: a parada usa a troca de linha do PES, e a NQ1400E pede para trocar/confirmar a linha a cada parada.
 - **Efeitos de preenchimento (etapa 5c):** feitos (degradê de duas cores, segue o contorno e quatro padrões). Ideias para depois: degradê com mais de duas cores, padrões próprios e preenchimento em espiral.
 - **Qualidade das letras (etapa 5d):** feita (satin em colunas, kerning e ligações por dentro das formas). Falta testar bordando.
-- **Mais formatos:** JEF, EXP e VP3.
-- **Ficha de produção** para impressão (cores, ordem, tamanho, número de pontos).
+- **Mais formatos e ficha de produção (etapa 5e):** feitos (EXP, JEF, VP3 e a ficha em HTML). Falta validar JEF e VP3 com os programas ou máquinas Janome e Pfaff/Viking.
 
 **Acabamento do produto**
 - **Identidade visual:** ícone do aplicativo e da janela já feito (bastidor com um X sendo bordado); falta a tela de abertura e uma logo para uso em documentos.

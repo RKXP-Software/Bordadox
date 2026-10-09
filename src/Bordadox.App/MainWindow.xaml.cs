@@ -366,6 +366,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ProductionSheet_Click(object sender, RoutedEventArgs e)
+    {
+        if (_editor.Design.Objects.Count == 0) { ShowMessage("O desenho está vazio."); return; }
+        var name = _editor.FilePath != null ? Path.GetFileNameWithoutExtension(_editor.FilePath) : "bordado";
+        var dlg = new SaveFileDialog { Title = "Ficha de produção", Filter = "Página da ficha (*.html)|*.html", FileName = name + " - ficha", DefaultExt = ".html" };
+        if (dlg.ShowDialog(this) != true) return;
+        try
+        {
+            var pattern = _editor.Pattern;
+            var sheet = Bordadox.Core.Production.ProductionSheet.From(pattern, _editor.Design, name, Bordadox.App.Rendering.PatternPreview.RenderPng(pattern));
+            File.WriteAllText(dlg.FileName, sheet.ToHtml(), new System.Text.UTF8Encoding(true));
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+            ShowMessage($"Ficha gerada: {dlg.FileName}. No navegador, use Imprimir (Ctrl+P) para imprimir ou salvar como PDF.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"Não foi possível gerar a ficha:\n{ex.Message}", "Bordadox", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void InsertEmbroidery_Click(object sender, RoutedEventArgs e)
     {
         var readable = EmbroideryFormats.All.Where(f => f.CanRead).ToList();

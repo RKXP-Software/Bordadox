@@ -64,7 +64,8 @@
                 <MenuItem Header="_Salvar projeto" Command="ApplicationCommands.Save" InputGestureText="Ctrl+S" />
                 <MenuItem Header="Salvar projeto _como..." Command="ApplicationCommands.SaveAs" InputGestureText="Ctrl+Shift+S" />
                 <Separator />
-                <MenuItem Header="_Exportar para a máquina (PES/DST)..." Command="local:AppCommands.Export" InputGestureText="Ctrl+E" />
+                <MenuItem Header="_Exportar para a máquina (PES, DST, EXP, JEF, VP3)..." Command="local:AppCommands.Export" InputGestureText="Ctrl+E" />
+                <MenuItem Header="_Ficha de produção (imprimir)..." Click="ProductionSheet_Click" ToolTip="Gera uma página com a prévia, o tamanho, os pontos, a sequência de linhas e o tempo estimado, para imprimir ou salvar como PDF." />
                 <MenuItem Header="_Digitalizar imagem (logo/desenho)..." Command="local:AppCommands.Digitize" InputGestureText="Ctrl+I" />
                 <MenuItem Header="_Inserir bordado no desenho..." Click="InsertEmbroidery_Click" />
                 <Separator />
@@ -129,7 +130,7 @@
                 <Button Style="{StaticResource ToolButton}" Command="ApplicationCommands.Open" Content="Abrir" ToolTip="Abrir projeto ou bordado (Ctrl+O)" />
                 <Button Style="{StaticResource ToolButton}" Command="ApplicationCommands.Save" Content="Salvar" ToolTip="Salvar projeto .bdx (Ctrl+S)" />
                 <Button Style="{StaticResource ToolButton}" Command="local:AppCommands.Digitize" Content="Digitalizar imagem" ToolTip="Transformar um logo (PNG, JPG, SVG) em bordado (Ctrl+I)" />
-                <Button Style="{StaticResource ToolButton}" Command="local:AppCommands.Export" Content="Exportar PES" FontWeight="SemiBold" ToolTip="Gerar arquivo para a máquina (Ctrl+E)" />
+                <Button Style="{StaticResource ToolButton}" Command="local:AppCommands.Export" Content="Exportar" FontWeight="SemiBold" ToolTip="Gerar arquivo para a máquina (Ctrl+E)" />
             </ToolBar>
             <ToolBar>
                 <Button Style="{StaticResource ToolButton}" Command="ApplicationCommands.Undo" Content="↶" ToolTip="Desfazer (Ctrl+Z)" />
