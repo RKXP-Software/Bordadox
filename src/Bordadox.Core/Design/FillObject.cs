@@ -80,7 +80,7 @@ public sealed class FillObject : ShapeObject
         };
     }
 
-    private List<StitchStep> One(List<List<Vec2>> runs) => new() { new StitchStep(Color, runs) };
+    private List<StitchStep> One(List<List<Vec2>> runs) => new() { new StitchStep(Color, runs, StopBefore) };
 
     /// <summary>Tatami ou satin comum, com reforço por baixo.</summary>
     private List<List<Vec2>> PlainRuns(List<IReadOnlyList<Vec2>> contours, Vec2? from)
@@ -164,7 +164,7 @@ public sealed class FillObject : ShapeObject
             KeepRow = keep,
         };
         layerA.AddRange(FillGenerator.Fill(contours, Layer(r => r < isSecond.Length && !isSecond[r]), from));
-        steps.Add(new StitchStep(first, FillGenerator.ConnectInside(layerA, contours)));
+        steps.Add(new StitchStep(first, FillGenerator.ConnectInside(layerA, contours), StopBefore));
 
         var layerB = FillGenerator.Fill(contours, Layer(r => r < isSecond.Length && isSecond[r]), layerA.Count > 0 ? layerA[^1][^1] : from);
         steps.Add(new StitchStep(second, FillGenerator.ConnectInside(layerB, contours)));

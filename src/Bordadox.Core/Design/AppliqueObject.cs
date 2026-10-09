@@ -46,13 +46,13 @@ public sealed class AppliqueObject : ShapeObject
         var contours = Contours().Where(c => c.Count >= 3).ToList();
 
         if (PlacementLine)
-            steps.Add(new StitchStep(GuideColor, contours.Select(c => Loop(c, 2.5)).ToList()));
+            steps.Add(new StitchStep(GuideColor, contours.Select(c => Loop(c, 2.5)).ToList(), StopBefore));
 
         // O tecido é colocado depois da guia e preso antes do acabamento: as duas paradas valem mesmo se as cores forem iguais.
         var tack = contours.Select(c => TackDown == TackDownType.Zigzag
             ? OutlineSatin.Zigzag(c, 1.4, 1.6)
             : Loop(c, 2.0)).ToList();
-        steps.Add(new StitchStep(GuideColor, tack, StopBefore: true));
+        steps.Add(new StitchStep(GuideColor, tack, StopBefore: true));   // a parada do objeto vale para o primeiro passo que existir
 
         var settings = new SatinSettings { Spacing = Math.Max(0.05, Spacing), PullCompensation = PullCompensation, AutoSplit = true, MaxStitch = 7 };
         var cover = new List<List<Vec2>>();

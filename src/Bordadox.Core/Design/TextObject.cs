@@ -184,6 +184,28 @@ public sealed class TextObject : EmbObject
     /// <summary>Faixas de uma coluna satin mais largas que isto (mm) ficam melhor como preenchimento comum.</summary>
     private const double MaxColumnWidthMm = 6;
 
+    /// <summary>
+    /// Divide o texto em um objeto de texto por letra (sem os espaços), cada um já no lugar certo (com o espaçamento, o kerning, a linha e o
+    /// alinhamento atuais) e com as mesmas configurações. Depois de dividido, cada letra pode ser movida, girada ou editada sozinha.
+    /// </summary>
+    public List<TextObject> SplitLetters()
+    {
+        var result = new List<TextObject>();
+        foreach (var glyph in Layout().Glyphs)
+        {
+            double inkMin = glyph.Local.SelectMany(c => c).Min(p => p.X);
+            var letter = (TextObject)Clone();
+            letter.Text = char.ConvertFromUtf32(glyph.CodePoint);
+            letter.Alignment = TextAlign.Left;          // a tinta da letra começa na origem
+            letter.Origin = ToWorld(new Vec2(glyph.Offset.X + inkMin, glyph.Offset.Y));
+            letter.Name = (string.IsNullOrWhiteSpace(Name) ? "Texto" : Name) + " — " + letter.Text;
+            letter.StopBefore = false;
+            result.Add(letter);
+        }
+        if (result.Count > 0) result[0].StopBefore = StopBefore;
+        return result;
+    }
+
     public override List<List<Vec2>> GenerateRuns(Vec2? from)
     {
         var runs = new List<List<Vec2>>();

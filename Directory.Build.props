@@ -2,7 +2,7 @@
 
   <!-- Versão única do produto: usada nos assemblies, no instalador e nos nomes dos pacotes. -->
   <PropertyGroup>
-    <Version>0.8.1</Version>
+    <Version>0.8.2</Version>
     <Company>RKXP Software</Company>
     <Product>Bordadox</Product>
     <Copyright>Uso pessoal</Copyright>

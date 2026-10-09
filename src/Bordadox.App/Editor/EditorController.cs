@@ -345,6 +345,30 @@ public sealed class EditorController
         return created.Count;
     }
 
+    /// <summary>
+    /// Explode os objetos selecionados em partes independentes (ver <see cref="Exploder"/>), no mesmo lugar da ordem de costura.
+    /// Devolve quantas partes foram criadas (0 se nada podia ser explodido). Um só Ctrl+Z desfaz tudo.
+    /// </summary>
+    public int Explode()
+    {
+        var targets = Selection.Where(Exploder.CanExplode).ToList();
+        if (targets.Count == 0) return 0;
+        var created = new List<EmbObject>();
+        Change(() =>
+        {
+            foreach (var old in targets)
+            {
+                var parts = Exploder.Explode(old);
+                int i = Design.Objects.IndexOf(old);
+                Design.Objects.RemoveAt(i);
+                Design.Objects.InsertRange(i, parts);
+                created.AddRange(parts);
+            }
+        });
+        Select(created);
+        return created.Count;
+    }
+
     /// <summary>Move a seleção na ordem de costura (-1 = antes, +1 = depois).</summary>
     public void MoveInSequence(int dir)
     {

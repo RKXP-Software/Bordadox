@@ -531,6 +531,13 @@ public partial class MainWindow : Window
     private void MirrorH_Click(object sender, RoutedEventArgs e) { _editor.Mirror(true); OnSelectionChanged(); }
     private void MirrorV_Click(object sender, RoutedEventArgs e) { _editor.Mirror(false); OnSelectionChanged(); }
     private void Center_Click(object sender, RoutedEventArgs e) => _editor.CenterInHoop();
+    private void Explode_Click(object sender, RoutedEventArgs e)
+    {
+        int n = _editor.Explode();
+        if (n == 0) ShowMessage("Selecione um texto, pontos importados (DST/PES) ou um aplique para explodir: os objetos simples não têm o que separar.");
+        else { ShowMessage($"Explodido em {n} partes (Ctrl+Z desfaz)."); OnSelectionChanged(); }
+    }
+
     private void ToApplique_Click(object sender, RoutedEventArgs e) => ConvertShapes(true);
     private void ToFill_Click(object sender, RoutedEventArgs e) => ConvertShapes(false);
 

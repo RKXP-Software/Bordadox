@@ -192,34 +192,34 @@
         </Border>
 
         <!-- Ferramentas -->
-        <Border DockPanel.Dock="Left" Width="86" Background="#F3F3F3" BorderBrush="#DDD" BorderThickness="0,0,1,0">
+        <Border DockPanel.Dock="Left" Width="43" Background="#F3F3F3" BorderBrush="#DDD" BorderThickness="0,0,1,0">
             <StackPanel Margin="0,6">
                 <RadioButton x:Name="ToolSelect" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Select" IsChecked="True" ToolTip="Selecionar, mover e editar nós (V)">
-                    <StackPanel><TextBlock Text="↖" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Selecionar (V)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="↖" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolRun" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Run" ToolTip="Ponto corrido (R)">
-                    <StackPanel><TextBlock Text="〰" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Corrido (R)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="〰" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolSatin" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Satin" ToolTip="Coluna satin: clique alternando os dois lados (C)">
-                    <StackPanel><TextBlock Text="▥" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Satin (C)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="▥" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolFill" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Fill" ToolTip="Preenchimento tatami/satin (F)">
-                    <StackPanel><TextBlock Text="▦" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Preencher (F)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="▦" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolApplique" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Applique" ToolTip="Aplique: guia, fixação do tecido e acabamento em satin, com paradas (A)">
-                    <StackPanel><TextBlock Text="◧" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Aplique (A)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="◧" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolHole" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Hole" ToolTip="Furo no preenchimento selecionado (H)">
-                    <StackPanel><TextBlock Text="◌" FontSize="18" HorizontalAlignment="Center" /><TextBlock Text="Furo (H)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="◌" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <RadioButton x:Name="ToolText" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Text" ToolTip="Texto com fontes do Windows (T)">
-                    <StackPanel><TextBlock Text="A" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" /><TextBlock Text="Texto (T)" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel><TextBlock Text="A" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <Separator Margin="6,8" />
-                <TextBlock Text="Cor atual" FontSize="11" HorizontalAlignment="Center" Foreground="#555" />
-                <Border x:Name="CurrentColorSwatch" Width="40" Height="40" CornerRadius="20" Margin="0,4"
+                <TextBlock Text="Cor atual" FontSize="7.5" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#555" />
+                <Border x:Name="CurrentColorSwatch" Width="22" Height="22" CornerRadius="11" Margin="0,3"
                         BorderBrush="#888" BorderThickness="1" />
-                <TextBlock x:Name="CurrentColorName" FontSize="10" TextWrapping="Wrap" TextAlignment="Center" Margin="4,0" />
+                <TextBlock x:Name="CurrentColorName" FontSize="8" TextWrapping="Wrap" TextAlignment="Center" Margin="4,0" />
             </StackPanel>
         </Border>
 

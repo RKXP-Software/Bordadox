@@ -54,6 +54,9 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 - Cantos e curvas ao desenhar (clique esquerdo = canto, direito = curva), Shift = ângulos de 15°.
 - Editar nós (arrastar, inserir, remover, alternar canto/curva), mover, selecionar por área, girar, espelhar, redimensionar,
   centralizar, duplicar, copiar/colar, **desfazer/refazer**, reordenar a sequência de costura e trocar a cor pela paleta Brother.
+- **Explodir** (Objeto › Explodir): separa o objeto selecionado em partes independentes. Texto vira uma letra por objeto (cada uma continua sendo texto editável), pontos importados de DST/PES viram um objeto por trecho contínuo, aplique e degradê viram um objeto de pontos por passo (com as paradas). Um Ctrl+Z desfaz.
+- **Parar a máquina antes de um objeto** (Propriedades › Sequência): força uma parada, mesmo com a mesma cor.
+- Barra de ferramentas da esquerda compacta (só os ícones; o nome e o atalho aparecem ao passar o mouse).
 - **Painel de propriedades** de cada objeto: ângulo, densidade, comprimento do ponto, compensação de puxada, reforço por baixo etc. Os campos em
   milímetros aceitam de **0 a 100** (quem decide o valor é o usuário; valores muito pequenos usam internamente o menor valor que ainda
   funciona, para nada travar). Todo objeto, inclusive os **pontos importados de DST/PES**, tem também **Largura, Altura, Centro X/Y** (com

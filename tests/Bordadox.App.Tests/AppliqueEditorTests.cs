@@ -129,3 +129,46 @@ public class AppliqueEditorTests
         Assert.Equal(before.MinY + 5, after.MinY, 6);
     }
 }
+
+public class ExplodeEditorTests
+{
+    private const double Px = 0.1;
+
+    [Fact]
+    public void ExplodeSelection_SplitsTheApplique_KeepsOrder_AndOneUndoRestoresIt()
+    {
+        var e = new EditorController();
+        e.LoadDesign(new EmbDesign(), null);
+        e.Tool = EditorTool.Fill;
+        foreach (var (x, y) in new[] { (0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0) })
+        {
+            e.MouseDown(new Vec2(x, y), MouseButton.Left, 1, ModifierKeys.None, Px);
+            e.MouseUp(new Vec2(x, y), ModifierKeys.None);
+        }
+        e.KeyDown(Key.Enter);
+        var fill = e.Design.Objects[0];
+        e.Select(new[] { fill });
+        Assert.Equal(1, e.ConvertShapes(toApplique: true));
+        var applique = e.Design.Objects[0];
+
+        e.Select(new[] { applique });
+        Assert.Equal(3, e.Explode());
+        Assert.Equal(3, e.Design.Objects.Count);
+        Assert.All(e.Design.Objects, o => Assert.IsType<StitchBlockObject>(o));
+        Assert.Equal(3, e.Selection.Count);
+        Assert.Equal(2, e.Pattern.Stitches.Count(s => s.Command == StitchCommand.ColorChange));
+
+        e.Undo();
+        Assert.IsType<AppliqueObject>(Assert.Single(e.Design.Objects));
+    }
+
+    [Fact]
+    public void ExplodeSelection_OnASimpleObject_DoesNothing()
+    {
+        var e = new EditorController();
+        e.LoadDesign(new EmbDesign(), null);
+        e.AddObjects(new EmbObject[] { new RunObject { Nodes = new() { new(new Vec2(0, 0)), new(new Vec2(10, 0)) } } });
+        Assert.Equal(0, e.Explode());
+        Assert.Single(e.Design.Objects);
+    }
+}

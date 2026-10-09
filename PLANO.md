@@ -118,6 +118,8 @@ Limitações conhecidas das letras:
   DST/PES de mesmo nome. Se a Wilcom publicar o formato (ou houver uma biblioteca de código aberto), basta implementar `EmbFormat.Read`.
 - **DST/PES abertos agora são editáveis:** todo objeto ganhou Largura/Altura/Centro X e Y (e "manter a proporção"); os pontos importados ganharam
   Ponto máximo e Ponto mínimo. Estas propriedades não são gravadas no projeto.
+- **Explodir um desenho:** `Exploder` (Objeto › Explodir). Texto: uma letra por objeto (`TextObject.SplitLetters`, mesma posição, espaçamento e kerning); pontos importados: um objeto por trecho; aplique e degradê: um bloco de pontos por passo. Novo `EmbObject.StopBefore` (parar a máquina antes do objeto), usado também pelo aplique explodido.
+- **Barra de ferramentas da esquerda:** metade do tamanho (43 px de largura, botões de 27 px, só ícones com dica).
 - **Campos em milímetros de 0 a 100:** todos os limites mínimos/máximos das propriedades foram abertos (exceto posições, ângulos e o tamanho total,
   que podem passar de 100 ou ser negativos). Os geradores usam internamente o menor valor útil quando o usuário digita 0 (teste com 0 e 100 em todos os campos).
   "Ignorar < X mm" da digitalização virou um campo numérico (`NumberBox`) em vez de um controle deslizante.

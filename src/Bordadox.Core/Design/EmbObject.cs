@@ -63,11 +63,15 @@ public abstract class EmbObject
     /// <param name="from">Posição atual da agulha, para escolher um início próximo (quando o objeto permite).</param>
     public abstract List<List<Vec2>> GenerateRuns(Vec2? from);
 
+    /// <summary>A máquina para antes deste objeto (como um comando de parada): dá tempo de trocar a linha, posicionar um tecido ou conferir.</summary>
+    [Category("Sequência"), DisplayName("Parar a máquina antes deste objeto")]
+    public bool StopBefore { get; set; }
+
     /// <summary>
     /// Passos do objeto, cada um com a sua cor e, se preciso, uma parada da máquina antes dele. A maioria dos objetos tem um passo só
     /// (as sequências de <see cref="GenerateRuns"/> na cor do objeto); aplique e degradê têm vários.
     /// </summary>
-    public virtual List<StitchStep> GenerateSteps(Vec2? from) => new() { new StitchStep(Color, GenerateRuns(from)) };
+    public virtual List<StitchStep> GenerateSteps(Vec2? from) => new() { new StitchStep(Color, GenerateRuns(from), StopBefore) };
 
     /// <summary>Contornos achatados para desenhar seleção e testar cliques.</summary>
     public abstract List<List<Vec2>> Outlines();
