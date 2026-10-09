@@ -8,7 +8,7 @@ namespace Bordadox.App.Editor;
 /// <summary>O que o usuário informa ao criar ou editar um texto.</summary>
 public sealed record TextSpec(string Text, string FontFamily, double HeightMm, bool Bold, bool Italic)
 {
-    public const double MinHeightMm = 2;
+    public const double MinHeightMm = 0;
     public const double MaxHeightMm = 100;
 
     /// <summary>Último texto usado (fonte, altura, estilo), para repetir sem digitar tudo de novo.</summary>

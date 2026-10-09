@@ -21,6 +21,7 @@ public static class EmbroideryFormats
         new ExpFormat(),
         new JefFormat(),
         new Vp3Format(),
+        new EmbFormat(),
     };
 
     public static IEmbroideryFormat? ForFile(string path)

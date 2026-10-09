@@ -47,17 +47,17 @@ public sealed class TextObject : EmbObject
     public bool Italic { get; set; }
 
     /// <summary>Altura das letras maiúsculas.</summary>
-    [Category("Texto"), DisplayName("Altura das maiúsculas (mm)"), Range(2, 100, 0.5)]
+    [Category("Texto"), DisplayName("Altura das maiúsculas (mm)"), Range(0, 100, 0.5)]
     public double HeightMm { get; set; } = 8;
 
-    [Category("Texto"), DisplayName("Espaço entre letras (mm)"), Range(-2, 10, 0.1)]
+    [Category("Texto"), DisplayName("Espaço entre letras (mm)"), Range(-100, 100, 0.1)]
     public double LetterSpacing { get; set; }
 
     /// <summary>Aproxima pares de letras como "AV" ou "To" usando a tabela de kerning da fonte.</summary>
     [Category("Texto"), DisplayName("Kerning (ajuste entre pares de letras)")]
     public bool Kerning { get; set; } = true;
 
-    [Category("Texto"), DisplayName("Espaço entre linhas (× altura)"), Range(0.8, 3, 0.05)]
+    [Category("Texto"), DisplayName("Espaço entre linhas (× altura)"), Range(0, 10, 0.05)]
     public double LineSpacing { get; set; } = 1.5;
 
     [Category("Texto"), DisplayName("Alinhamento")]
@@ -90,13 +90,13 @@ public sealed class TextObject : EmbObject
     [Category("Preenchimento"), DisplayName("Satin em colunas (segue o traço)")]
     public bool SatinColumns { get; set; } = true;
 
-    [Category("Preenchimento"), DisplayName("Densidade (mm entre linhas)"), Range(0.2, 2, 0.05)]
+    [Category("Preenchimento"), DisplayName("Densidade (mm entre linhas)"), Range(0, 100, 0.05)]
     public double Spacing { get; set; } = 0.4;
 
-    [Category("Preenchimento"), DisplayName("Comprimento do ponto (mm)"), Range(1, 7, 0.1)]
+    [Category("Preenchimento"), DisplayName("Comprimento do ponto (mm)"), Range(0, 100, 0.1)]
     public double StitchLength { get; set; } = 3.5;
 
-    [Category("Preenchimento"), DisplayName("Compensação de puxada (mm)"), Range(0, 1, 0.05)]
+    [Category("Preenchimento"), DisplayName("Compensação de puxada (mm)"), Range(0, 100, 0.05)]
     public double PullCompensation { get; set; } = 0.15;
 
     [Category("Preenchimento"), DisplayName("Reforço por baixo")]
@@ -126,8 +126,9 @@ public sealed class TextObject : EmbObject
         if (provider == null || string.IsNullOrEmpty(Text)) return (result, 0);
 
         double cap = provider.CapHeight(FontFamily, Bold, Italic);
-        double em = HeightMm / (cap > 0.2 ? cap : 0.7);
-        double pitch = HeightMm * LineSpacing;
+        double height = Math.Max(0.5, HeightMm);   // altura 0 não deixaria letra nenhuma: usa o mínimo
+        double em = height / (cap > 0.2 ? cap : 0.7);
+        double pitch = height * LineSpacing;
 
         var lines = Text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
         for (int li = 0; li < lines.Length; li++)
@@ -247,7 +248,7 @@ public sealed class TextObject : EmbObject
 
     private static List<List<(Vec2 A, Vec2 B)>>? SafeBuild(List<List<Vec2>> contours, double pairSpacing)
     {
-        try { return ColumnSatin.Build(contours, pairSpacing, MaxColumnWidthMm); }
+        try { return ColumnSatin.Build(contours, Math.Max(0.05, pairSpacing), MaxColumnWidthMm); }
         catch (Exception) { return null; }   // letra estranha: cai para o preenchimento comum
     }
 

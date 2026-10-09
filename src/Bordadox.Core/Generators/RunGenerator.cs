@@ -23,6 +23,7 @@ public static class RunGenerator
     /// <summary>Divide uma polilinha suave em pontos de comprimento uniforme ao longo do arco.</summary>
     public static List<Vec2> ResampleSection(IReadOnlyList<Vec2> section, double stitchLength)
     {
+        stitchLength = Math.Max(0.2, stitchLength);   // 0 ou valores minúsculos viram o menor ponto útil
         if (section.Count < 2) return section.ToList();
         var total = GeometryUtil.PolylineLength(section);
         if (total < 1e-6) return new List<Vec2> { section[0] };

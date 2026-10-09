@@ -298,6 +298,13 @@ public partial class MainWindow : Window
             }
             Canvas.ZoomToFit();
         }
+        catch (WilcomEmbException emb)
+        {
+            // .emb da Wilcom: não dá para ler os pontos; explica, mostra a miniatura e oferece o DST/PES de mesmo nome, se existir.
+            var sidecar = EmbInfoDialog.FindSidecar(path);
+            var dialog = new EmbInfoDialog(this, path, emb, sidecar);
+            if (dialog.ShowDialog() == true && dialog.OpenInstead != null) OpenFile(dialog.OpenInstead);
+        }
         catch (Exception ex)
         {
             MessageBox.Show(this, $"Não foi possível abrir o arquivo:\n{path}\n\n{ex.Message}",

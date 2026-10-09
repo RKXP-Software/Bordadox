@@ -21,7 +21,8 @@ public class SampleFileTests(ITestOutputHelper output)
     public static IEnumerable<object[]> Files()
     {
         var found = Directory.Exists(SamplesDir)
-            ? Directory.EnumerateFiles(SamplesDir).Where(f => EmbroideryFormats.ForFile(f) != null).Select(f => new object[] { Path.GetFileName(f) }).ToList()
+            ? Directory.EnumerateFiles(SamplesDir).Where(f => EmbroideryFormats.ForFile(f) is { Extension: not "emb" })   // o .emb da Wilcom não abre: tem teste próprio
+                .Select(f => new object[] { Path.GetFileName(f) }).ToList()
             : new List<object[]>();
         return found.Count > 0 ? found : new List<object[]> { new object[] { "" } };
     }

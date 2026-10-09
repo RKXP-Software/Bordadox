@@ -10,7 +10,7 @@ public sealed class RunObject : EmbObject
 {
     public List<PathNode> Nodes { get; set; } = new();
 
-    [Category("Ponto corrido"), DisplayName("Comprimento do ponto (mm)"), Range(1, 7, 0.1)]
+    [Category("Ponto corrido"), DisplayName("Comprimento do ponto (mm)"), Range(0, 100, 0.1)]
     public double StitchLength { get; set; } = 2.5;
 
     [Category("Ponto corrido"), DisplayName("Ponto triplo (reforçado)")]
@@ -53,16 +53,16 @@ public sealed class SatinObject : EmbObject
 {
     public List<PathNode> Nodes { get; set; } = new();
 
-    [Category("Satin"), DisplayName("Densidade (mm entre pontos)"), Range(0.2, 2, 0.05)]
+    [Category("Satin"), DisplayName("Densidade (mm entre pontos)"), Range(0, 100, 0.05)]
     public double Spacing { get; set; } = 0.4;
 
-    [Category("Satin"), DisplayName("Compensação de puxada (mm)"), Range(0, 1, 0.05)]
+    [Category("Satin"), DisplayName("Compensação de puxada (mm)"), Range(0, 100, 0.05)]
     public double PullCompensation { get; set; } = 0.15;
 
     [Category("Satin"), DisplayName("Dividir pontos longos")]
     public bool AutoSplit { get; set; } = true;
 
-    [Category("Satin"), DisplayName("Ponto máximo (mm)"), Range(3, 12, 0.5)]
+    [Category("Satin"), DisplayName("Ponto máximo (mm)"), Range(0, 100, 0.5)]
     public double MaxStitch { get; set; } = 7;
 
     [Category("Reforço por baixo"), DisplayName("Corrido central")]
@@ -74,7 +74,7 @@ public sealed class SatinObject : EmbObject
     [Category("Reforço por baixo"), DisplayName("Zigue-zague")]
     public bool ZigzagUnderlay { get; set; }
 
-    [Category("Reforço por baixo"), DisplayName("Espaçamento do zigue-zague (mm)"), Range(1, 5, 0.1)]
+    [Category("Reforço por baixo"), DisplayName("Espaçamento do zigue-zague (mm)"), Range(0, 100, 0.1)]
     public double ZigzagSpacing { get; set; } = 2;
 
     public override string TypeName => "Coluna satin";
@@ -188,13 +188,42 @@ public sealed class StitchBlockObject : EmbObject
     /// <summary>Sequências contínuas de pontos (mm).</summary>
     public List<List<Vec2>> Runs { get; set; } = new();
 
+    /// <summary>Pontos mais longos que isto (mm) são divididos em pontos iguais. 0 = não divide.</summary>
+    [Category("Pontos importados"), DisplayName("Ponto máximo (mm)"), Range(0, 100, 0.5)]
+    public double MaxStitchMm { get; set; }
+
+    /// <summary>Pontos mais curtos que isto (mm) são tirados. 0 = não tira nenhum.</summary>
+    [Category("Pontos importados"), DisplayName("Ponto mínimo (mm)"), Range(0, 100, 0.1)]
+    public double MinStitchMm { get; set; }
+
     public override string TypeName => "Pontos importados";
     public override IReadOnlyList<IReadOnlyList<PathNode>> EditablePaths => Array.Empty<IReadOnlyList<PathNode>>();
     public override void SetNode(int path, int index, PathNode node) { }
     public override void InsertNode(int path, int index, PathNode node) { }
     public override bool RemoveNode(int path, int index) => false;
 
-    public override List<List<Vec2>> GenerateRuns(Vec2? from) => Runs.Select(r => r.ToList()).ToList();
+    public override List<List<Vec2>> GenerateRuns(Vec2? from) => Runs.Select(Process).ToList();
+
+    /// <summary>Aplica o ponto mínimo (tira pontos muito próximos) e o máximo (divide pontos longos), sem mexer no desenho original.</summary>
+    private List<Vec2> Process(List<Vec2> run)
+    {
+        if (MaxStitchMm <= 0 && MinStitchMm <= 0) return run.ToList();
+        var result = new List<Vec2>();
+        foreach (var p in run)
+        {
+            if (result.Count == 0) { result.Add(p); continue; }
+            var prev = result[^1];
+            double d = Vec2.Distance(prev, p);
+            if (MinStitchMm > 0 && d < MinStitchMm && p != run[^1]) continue;
+            if (MaxStitchMm > 0.05 && d > MaxStitchMm)
+            {
+                int parts = (int)Math.Ceiling(d / MaxStitchMm);
+                for (int k = 1; k < parts; k++) result.Add(Vec2.Lerp(prev, p, (double)k / parts));
+            }
+            result.Add(p);
+        }
+        return result;
+    }
     public override List<List<Vec2>> Outlines() => Runs;
 
     public override void Transform(Func<Vec2, Vec2> f) =>

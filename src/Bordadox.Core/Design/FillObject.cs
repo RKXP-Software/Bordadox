@@ -26,22 +26,22 @@ public sealed class FillObject : ShapeObject
     [Category("Preenchimento"), DisplayName("Satin: ângulo automático (cruza a largura)")]
     public bool SatinAutoAngle { get; set; } = true;
 
-    [Category("Preenchimento"), DisplayName("Densidade (mm entre linhas)"), Range(0.2, 2, 0.05)]
+    [Category("Preenchimento"), DisplayName("Densidade (mm entre linhas)"), Range(0, 100, 0.05)]
     public double Spacing { get; set; } = 0.4;
 
-    [Category("Preenchimento"), DisplayName("Comprimento do ponto (mm)"), Range(1, 7, 0.1)]
+    [Category("Preenchimento"), DisplayName("Comprimento do ponto (mm)"), Range(0, 100, 0.1)]
     public double StitchLength { get; set; } = 3.5;
 
-    [Category("Preenchimento"), DisplayName("Compensação de puxada (mm)"), Range(0, 1, 0.05)]
+    [Category("Preenchimento"), DisplayName("Compensação de puxada (mm)"), Range(0, 100, 0.05)]
     public double PullCompensation { get; set; } = 0.2;
 
-    [Category("Preenchimento"), DisplayName("Ponto satin máximo (mm)"), Range(3, 12, 0.5)]
+    [Category("Preenchimento"), DisplayName("Ponto satin máximo (mm)"), Range(0, 100, 0.5)]
     public double MaxSatinLength { get; set; } = 7;
 
     [Category("Reforço por baixo"), DisplayName("Tatami por baixo")]
     public bool Underlay { get; set; } = true;
 
-    [Category("Reforço por baixo"), DisplayName("Espaçamento do reforço (mm)"), Range(1, 6, 0.1)]
+    [Category("Reforço por baixo"), DisplayName("Espaçamento do reforço (mm)"), Range(0, 100, 0.1)]
     public double UnderlaySpacing { get; set; } = 2.5;
 
     [Category("Reforço por baixo"), DisplayName("Corrido no contorno")]
@@ -60,7 +60,7 @@ public sealed class FillObject : ShapeObject
     [Category("Efeito"), DisplayName("Padrão")]
     public FillPattern Pattern { get; set; } = FillPattern.Wave;
 
-    [Category("Efeito"), DisplayName("Padrão: tamanho (mm)"), Range(1.5, 8, 0.25)]
+    [Category("Efeito"), DisplayName("Padrão: tamanho (mm)"), Range(0, 100, 0.25)]
     public double PatternSize { get; set; } = 3;
 
     public override string TypeName => "Preenchimento";

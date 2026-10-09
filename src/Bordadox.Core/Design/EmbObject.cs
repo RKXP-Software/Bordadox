@@ -81,6 +81,56 @@ public abstract class EmbObject
 
     public Rect2 Bounds() => Rect2.FromPoints(Outlines().SelectMany(o => o));
 
+    // ---------- Tamanho e posição (valem para qualquer objeto, inclusive pontos importados de DST/PES) ----------
+
+    private const double MinBoxMm = 0.1;
+
+    /// <summary>Ao mudar a largura ou a altura, muda a outra na mesma proporção. Só vale na tela; não é gravado no projeto.</summary>
+    [Category("Tamanho e posição"), DisplayName("Manter a proporção"), JsonIgnore]
+    public bool KeepAspect { get; set; } = true;
+
+    [Category("Tamanho e posição"), DisplayName("Largura total (mm)"), Range(0, 1000, 1), JsonIgnore]
+    public double BoxWidthMm
+    {
+        get => Bounds().Width;
+        set => Resize(value, null);
+    }
+
+    [Category("Tamanho e posição"), DisplayName("Altura total (mm)"), Range(0, 1000, 1), JsonIgnore]
+    public double BoxHeightMm
+    {
+        get => Bounds().Height;
+        set => Resize(null, value);
+    }
+
+    [Category("Tamanho e posição"), DisplayName("Centro X (mm)"), Range(-1000, 1000, 1), JsonIgnore]
+    public double BoxCenterX
+    {
+        get => Bounds().IsEmpty ? 0 : Bounds().Center.X;
+        set { var b = Bounds(); if (!b.IsEmpty) { double dx = value - b.Center.X; Transform(p => new Vec2(p.X + dx, p.Y)); } }
+    }
+
+    [Category("Tamanho e posição"), DisplayName("Centro Y (mm)"), Range(-1000, 1000, 1), JsonIgnore]
+    public double BoxCenterY
+    {
+        get => Bounds().IsEmpty ? 0 : Bounds().Center.Y;
+        set { var b = Bounds(); if (!b.IsEmpty) { double dy = value - b.Center.Y; Transform(p => new Vec2(p.X, p.Y + dy)); } }
+    }
+
+    private void Resize(double? width, double? height)
+    {
+        var b = Bounds();
+        if (b.IsEmpty) return;
+        double sx = 1, sy = 1;
+        if (width is { } w) sx = Math.Max(MinBoxMm, w) / Math.Max(1e-9, b.Width);
+        if (height is { } h) sy = Math.Max(MinBoxMm, h) / Math.Max(1e-9, b.Height);
+        if (KeepAspect) { if (width != null) sy = sx; else sx = sy; }
+        if (b.Width < 1e-9) sx = 1;      // uma linha reta vertical não tem largura para escalar
+        if (b.Height < 1e-9) sy = 1;
+        var c = b.Center;
+        Transform(p => new Vec2(c.X + (p.X - c.X) * sx, c.Y + (p.Y - c.Y) * sy));
+    }
+
     public EmbObject Clone()
     {
         var json = JsonSerializer.Serialize(this, DesignJson.Options);

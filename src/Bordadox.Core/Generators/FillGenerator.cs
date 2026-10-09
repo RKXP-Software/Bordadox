@@ -27,6 +27,9 @@ public sealed record FillSettings
 /// </summary>
 public static class FillGenerator
 {
+    /// <summary>Menor densidade (mm entre linhas) e menor ponto (mm) usados de fato, mesmo que o usuário digite menos.</summary>
+    public const double MinSpacing = 0.05, MinStitchLength = 0.3;
+
     private readonly record struct Segment(double X0, double X1, double Y, int Row);
 
     /// <summary>Um trecho de linha de costura, no sistema girado: de X0 a X1 na altura Y, na linha de número Row.</summary>
@@ -38,6 +41,7 @@ public static class FillGenerator
     /// </summary>
     public static List<RowSegment> Rows(IReadOnlyList<IReadOnlyList<Vec2>> contours, double angleDeg, double spacing)
     {
+        spacing = Math.Max(MinSpacing, spacing);
         var result = new List<RowSegment>();
         if (contours.Count == 0 || contours[0].Count < 3 || spacing <= 0.01) return result;
         double rad = angleDeg * Math.PI / 180;
@@ -49,6 +53,8 @@ public static class FillGenerator
 
     public static List<List<Vec2>> Fill(IReadOnlyList<IReadOnlyList<Vec2>> contours, FillSettings s, Vec2? from = null)
     {
+        // Valores muito pequenos (o usuário pode digitar 0) travariam o gerador: usa o menor valor que ainda faz sentido.
+        s = s with { Spacing = Math.Max(MinSpacing, s.Spacing), StitchLength = Math.Max(MinStitchLength, s.StitchLength), MaxSatinLength = Math.Max(1, s.MaxSatinLength) };
         var result = new List<List<Vec2>>();
         if (contours.Count == 0 || contours[0].Count < 3 || s.Spacing <= 0.01) return result;
 

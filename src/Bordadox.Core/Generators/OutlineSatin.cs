@@ -15,6 +15,7 @@ public static class OutlineSatin
 
     public static List<(Vec2 A, Vec2 B)> Pairs(IReadOnlyList<Vec2> contour, double width, double step)
     {
+        step = Math.Max(0.02, step);
         var pairs = new List<(Vec2, Vec2)>();
         var ring = Dedupe(contour);
         if (ring.Count < 3) return pairs;

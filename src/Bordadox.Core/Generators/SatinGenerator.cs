@@ -18,6 +18,7 @@ public static class SatinGenerator
     /// <summary>Pares (ponto no trilho A, ponto no trilho B) espaçados ao longo da coluna.</summary>
     public static List<(Vec2 A, Vec2 B)> SamplePairs(IReadOnlyList<PathNode> railA, IReadOnlyList<PathNode> railB, double spacing)
     {
+        spacing = Math.Max(0.02, spacing);
         var pairs = new List<(Vec2, Vec2)>();
         int sections = Math.Min(railA.Count, railB.Count) - 1;
         if (sections < 1) return pairs;
@@ -42,6 +43,7 @@ public static class SatinGenerator
     /// </summary>
     public static List<Vec2> Satin(List<(Vec2 A, Vec2 B)> pairs, SatinSettings s)
     {
+        s = s with { MaxStitch = Math.Max(1, s.MaxStitch) };
         var pts = new List<Vec2>();
         for (int i = 0; i < pairs.Count; i++)
         {

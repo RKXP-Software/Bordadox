@@ -53,8 +53,8 @@ public sealed class DigitizeDialog : Window
         Content = new TextBlock { Text = "Áreas internas da cor do fundo viram tecido, sem ponto (miolo do O, do A...)", TextWrapping = TextWrapping.Wrap },
         IsChecked = true,
     };
-    private readonly Slider _detail = new() { Minimum = 0.3, Maximum = 2.0, Value = 0.6, Width = 190 };
-    private readonly TextBlock _detailLabel = new() { Width = 70, VerticalAlignment = VerticalAlignment.Center };
+    private readonly NumberBox _detail = new() { Minimum = 0, Maximum = 100, Step = 0.1, Value = 0.6 };
+    private readonly TextBlock _detailLabel = new() { Text = " mm", VerticalAlignment = VerticalAlignment.Center };
     private readonly ComboBox _fillMode = new();
     private readonly CheckBox _keepReference = new() { Content = "Manter a imagem como fundo de referência" };
     // Zoom e deslocamento da prévia (a imagem ocupa a área inteira; a escala é em torno do cursor).
@@ -301,7 +301,6 @@ public sealed class DigitizeDialog : Window
     {
         _colors.IsEnabled = true;
         _colorsLabel.Text = _autoColors.IsChecked == true ? $"{(int)_colors.Value} no máx." : $"{(int)_colors.Value} exatas";
-        _detailLabel.Text = $"{_detail.Value:0.0} mm";
     }
 
     /// <summary>Liga/desliga o modo em que a imagem só vira fundo de referência, sem gerar bordado.</summary>
@@ -479,7 +478,7 @@ public sealed class DigitizeDialog : Window
         var cts = _previewCts = new CancellationTokenSource();
         int version = ++_previewVersion;
         var options = CurrentOptions();
-        options.WidthMm = Math.Max(5, WidthMm);
+        options.WidthMm = Math.Max(1, WidthMm);
         var source = _loaded.Image;
         _summary.Text = "Calculando a prévia...";
 

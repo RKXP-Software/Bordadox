@@ -109,6 +109,19 @@ Limitações conhecidas das letras:
   tempo estimado (700 pontos/min, +30 s por troca, +6 s por corte), sequência de linhas com as paradas do aplique explicadas e lista de objetos.
   Arquivo › Ficha de produção; imprime ou salva em PDF pelo navegador.
 
+### Feedback dos usuários (1)
+- **Abrir .emb da Wilcom:** analisado com o par `IMPERIO.EMB` / `IMPERIO.DST` (do usuário). O .emb é um arquivo composto OLE2 (`CompoundFile`, leitor
+  próprio da especificação MS-CFB) com os fluxos `DesignDocument` (47 KB), `CorelDocument` (1,3 MB), `Contents` e `DESIGN_ICON` (ambos zlib),
+  `WilcomDesignInformationDDD` e `AUX_INFO`. `DesignDocument` e `CorelDocument` não decodificam como deflate/zlib e têm entropia de 7,99
+  bits/byte: formato fechado/cifrado, sem especificação pública. **Não foi feita engenharia reversa nem quebra de proteção** (regra do projeto).
+  Entrega: `EmbFormat` reconhece o arquivo e a janela `EmbInfoDialog` mostra a miniatura (`DESIGN_ICON`), orienta a exportar como DST/PES e oferece abrir o
+  DST/PES de mesmo nome. Se a Wilcom publicar o formato (ou houver uma biblioteca de código aberto), basta implementar `EmbFormat.Read`.
+- **DST/PES abertos agora são editáveis:** todo objeto ganhou Largura/Altura/Centro X e Y (e "manter a proporção"); os pontos importados ganharam
+  Ponto máximo e Ponto mínimo. Estas propriedades não são gravadas no projeto.
+- **Campos em milímetros de 0 a 100:** todos os limites mínimos/máximos das propriedades foram abertos (exceto posições, ângulos e o tamanho total,
+  que podem passar de 100 ou ser negativos). Os geradores usam internamente o menor valor útil quando o usuário digita 0 (teste com 0 e 100 em todos os campos).
+  "Ignorar < X mm" da digitalização virou um campo numérico (`NumberBox`) em vez de um controle deslizante.
+
 ### Pedidos do usuário ainda na fila
 - ✅ **Identidade visual (ícone):** bastidor com um X sendo bordado, aprovado pelo usuário; gerado por `build/gerar-icone.ps1` (16 a 256 px, com versão simplificada para tamanhos pequenos). Pendente: tela de abertura e logo para documentos.
 - ✅ **Instalador e versão portátil:** `build/publicar.ps1` gera `dist/Bordadox-<versão>-setup.exe` (Inno Setup, por usuário, sem administrador, associa .bdx e "Abrir com" .pes/.dst) e `dist/Bordadox-<versão>-portable.zip`, ambos autocontidos (.NET 10 embutido). Falta assinatura de código.

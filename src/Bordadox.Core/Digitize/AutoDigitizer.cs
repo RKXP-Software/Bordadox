@@ -147,7 +147,7 @@ public static class AutoDigitizer
         // 1) Tamanho de trabalho (depois de cortar a margem de fundo).
         if (o.CropToContent) source = CropToContent(source, o.Quantize, ct);
         double aspect = source.Height / (double)source.Width;
-        double wMm = Math.Max(5, o.WidthMm), hMm = wMm * aspect;
+        double wMm = Math.Max(1, o.WidthMm), hMm = wMm * aspect;
         double ppm = Math.Clamp(Math.Min(o.PixelsPerMm, 1500 / Math.Max(wMm, hMm)), 2, 20);
         int w = Math.Max(8, (int)Math.Round(wMm * ppm)), h = Math.Max(8, (int)Math.Round(hMm * ppm));
         Report("Preparando a imagem", 0.02);

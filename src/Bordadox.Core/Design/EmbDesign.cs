@@ -8,13 +8,13 @@ namespace Bordadox.Core.Design;
 
 public sealed class DesignSettings
 {
-    [Category("Sequência"), DisplayName("Cortar saltos maiores que (mm)"), Range(0.5, 20, 0.5)]
+    [Category("Sequência"), DisplayName("Cortar saltos maiores que (mm)"), Range(0, 100, 0.5)]
     public double TrimAtMm { get; set; } = 3;
 
     [Category("Sequência"), DisplayName("Pontos de arremate")]
     public bool TieStitches { get; set; } = true;
 
-    [Category("Sequência"), DisplayName("Ponto mínimo (mm)"), Range(0, 1, 0.05)]
+    [Category("Sequência"), DisplayName("Ponto mínimo (mm)"), Range(0, 100, 0.05)]
     public double MinStitchMm { get; set; } = 0.3;
 
     /// <summary>Com o bastidor deitado, gira o arquivo exportado 90° para caber no bastidor da máquina (que fica em pé).</summary>
@@ -41,7 +41,7 @@ public sealed class BackgroundImage
     public double Y { get; set; }
 
     /// <summary>Largura em mm; a altura acompanha mantendo a proporção da imagem.</summary>
-    [Category("Imagem de fundo"), DisplayName("Largura (mm)"), Range(5, 500, 1)]
+    [Category("Imagem de fundo"), DisplayName("Largura (mm)"), Range(0, 1000, 1)]
     public double WidthMm
     {
         get => _widthMm;

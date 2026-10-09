@@ -15,6 +15,7 @@ public static class ContourFill
     /// <summary>Anéis de cada nível: nível 0 é o contorno recuado meia densidade; cada nível seguinte recua mais uma densidade.</summary>
     public static List<List<List<Vec2>>> Rings(IReadOnlyList<IReadOnlyList<Vec2>> contours, double spacing, double firstInset)
     {
+        spacing = Math.Max(FillGenerator.MinSpacing, spacing);
         var levels = new List<List<List<Vec2>>>();
         if (contours.Count == 0 || spacing < 0.05) return levels;
 
@@ -61,6 +62,8 @@ public static class ContourFill
     /// </summary>
     public static List<List<Vec2>> Generate(IReadOnlyList<IReadOnlyList<Vec2>> contours, double spacing, double stitchLength, Vec2? from = null)
     {
+        spacing = Math.Max(FillGenerator.MinSpacing, spacing);
+        stitchLength = Math.Max(FillGenerator.MinStitchLength, stitchLength);
         var runs = new List<List<Vec2>>();
         var levels = Rings(contours, spacing, spacing / 2);
         List<Vec2>? current = null;

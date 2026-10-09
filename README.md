@@ -54,7 +54,10 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 - Cantos e curvas ao desenhar (clique esquerdo = canto, direito = curva), Shift = ângulos de 15°.
 - Editar nós (arrastar, inserir, remover, alternar canto/curva), mover, selecionar por área, girar, espelhar, redimensionar,
   centralizar, duplicar, copiar/colar, **desfazer/refazer**, reordenar a sequência de costura e trocar a cor pela paleta Brother.
-- **Painel de propriedades** de cada objeto: ângulo, densidade, comprimento do ponto, compensação de puxada, reforço por baixo etc.
+- **Painel de propriedades** de cada objeto: ângulo, densidade, comprimento do ponto, compensação de puxada, reforço por baixo etc. Os campos em
+  milímetros aceitam de **0 a 100** (quem decide o valor é o usuário; valores muito pequenos usam internamente o menor valor que ainda
+  funciona, para nada travar). Todo objeto, inclusive os **pontos importados de DST/PES**, tem também **Largura, Altura, Centro X/Y** (com
+  "manter a proporção"); os pontos importados ganham **Ponto máximo** (divide pontos longos) e **Ponto mínimo** (tira pontos muito curtos).
 - **Satin com ângulo automático** (os pontos cruzam a largura da forma) e **tatami** com penetrações escalonadas.
 - **Montagem automática da costura:** pontos de arremate, cortes em saltos longos, trocas de cor e ligação dos trechos
   de um preenchimento por dentro da forma (menos saltos e cortes).
@@ -271,6 +274,7 @@ detecção de fotos, digitalização de ponta a ponta com imagens reais, aplique
   poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
 - **A estimativa de pontos** da janela é aproximada (erro de uns 10% nos logos de teste; o valor final, depois de gerar, é exato).
 - Formatos: **PES** (validado na máquina), **DST**, **EXP**, **JEF** e **VP3** (estes quatro sem validação em máquina ou software da marca; o PES é o recomendado para a NQ1400E).
+- **.emb da Wilcom não abre**: é um arquivo composto OLE2 cujos dados do desenho (fluxos `DesignDocument` e `CorelDocument`) não são compactação comum e têm entropia de dado cifrado; sem especificação pública, o Bordadox não os lê. Ao abrir um .emb, a janela mostra a miniatura guardada nele, explica como exportar como DST/PES no Wilcom e, se houver na mesma pasta o mesmo desenho em DST/PES/EXP/JEF/VP3, oferece abri-lo.
 - Somente **Windows** (WPF).
 
 ---

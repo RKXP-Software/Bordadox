@@ -219,7 +219,8 @@ public class EditorTests
         Assert.True(TextSpec.TryParseHeight("8", out var a) && a == 8);
         Assert.True(TextSpec.TryParseHeight("7,5", out var b) && b == 7.5);
         Assert.True(TextSpec.TryParseHeight("7.5", out var c) && c == 7.5);
-        Assert.False(TextSpec.TryParseHeight("1", out _));
+        Assert.True(TextSpec.TryParseHeight("0", out var zero) && zero == 0);   // o mínimo é zero: quem decide é o usuário
+        Assert.False(TextSpec.TryParseHeight("-1", out _));
         Assert.False(TextSpec.TryParseHeight("101", out _));
         Assert.False(TextSpec.TryParseHeight("abc", out _));
         Assert.False(TextSpec.TryParseHeight("", out _));

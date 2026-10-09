@@ -28,13 +28,13 @@ public sealed class AppliqueObject : ShapeObject
     [Category("Aplique"), DisplayName("Cor da guia e da fixação")]
     public ThreadColor GuideColor { get; set; } = BrotherPalette.Colors[39];
 
-    [Category("Acabamento"), DisplayName("Largura do satin (mm)"), Range(1.5, 8, 0.25)]
+    [Category("Acabamento"), DisplayName("Largura do satin (mm)"), Range(0, 100, 0.25)]
     public double CoverWidth { get; set; } = 3;
 
-    [Category("Acabamento"), DisplayName("Densidade (mm entre linhas)"), Range(0.25, 1, 0.05)]
+    [Category("Acabamento"), DisplayName("Densidade (mm entre linhas)"), Range(0, 100, 0.05)]
     public double Spacing { get; set; } = 0.4;
 
-    [Category("Acabamento"), DisplayName("Compensação de puxada (mm)"), Range(0, 0.6, 0.05)]
+    [Category("Acabamento"), DisplayName("Compensação de puxada (mm)"), Range(0, 100, 0.05)]
     public double PullCompensation { get; set; } = 0.15;
 
     public override string TypeName => "Aplique";
@@ -54,7 +54,7 @@ public sealed class AppliqueObject : ShapeObject
             : Loop(c, 2.0)).ToList();
         steps.Add(new StitchStep(GuideColor, tack, StopBefore: true));
 
-        var settings = new SatinSettings { Spacing = Spacing, PullCompensation = PullCompensation, AutoSplit = true, MaxStitch = 7 };
+        var settings = new SatinSettings { Spacing = Math.Max(0.05, Spacing), PullCompensation = PullCompensation, AutoSplit = true, MaxStitch = 7 };
         var cover = new List<List<Vec2>>();
         foreach (var c in contours)
         {

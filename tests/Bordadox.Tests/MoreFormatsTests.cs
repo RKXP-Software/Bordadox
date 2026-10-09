@@ -51,11 +51,13 @@ public class MoreFormatsTests
     [Fact]
     public void AllFiveFormatsAreRegistered_AndFoundByExtension()
     {
-        Assert.Equal(new[] { "pes", "dst", "exp", "jef", "vp3" }, EmbroideryFormats.All.Select(f => f.Extension).ToArray());
+        Assert.Equal(new[] { "pes", "dst", "exp", "jef", "vp3", "emb" }, EmbroideryFormats.All.Select(f => f.Extension).ToArray());
         Assert.IsType<JefFormat>(EmbroideryFormats.ForFile(@"C:\x\Meu Bordado.JEF"));
         Assert.IsType<Vp3Format>(EmbroideryFormats.ForFile("a.vp3"));
         Assert.IsType<ExpFormat>(EmbroideryFormats.ForFile("a.exp"));
-        Assert.All(EmbroideryFormats.All, f => { Assert.True(f.CanRead); Assert.True(f.CanWrite); });
+        Assert.All(EmbroideryFormats.All, f => Assert.True(f.CanRead));
+        Assert.All(EmbroideryFormats.All.Where(f => f.Extension != "emb"), f => Assert.True(f.CanWrite));
+        Assert.False(Fmt("emb").CanWrite);   // o .emb da Wilcom só é reconhecido
     }
 
     [Theory]
