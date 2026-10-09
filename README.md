@@ -127,9 +127,10 @@ Os pacotes ficam em `dist/` e já trazem o .NET 10 embutido (Windows 10/11 de 64
 - `Bordadox-<versão>-setup.exe`: instalador. Instala só para o usuário atual (não pede administrador) em
   `%LOCALAPPDATA%\Programs\Bordadox`, cria atalho no Menu Iniciar (e, opcional, na Área de Trabalho), associa `.bdx`
   ao Bordadox e o inclui em "Abrir com" para `.pes`, `.dst`, `.exp`, `.jef` e `.vp3`. Desinstala pelo Windows, removendo as associações.
+  **Atualiza por cima**: instalar uma versão nova sobre uma antiga troca os arquivos na mesma pasta, mantém as opções e as associações, fecha o programa se estiver aberto, remove bibliotecas que sobraram de versões anteriores e não mexe nos projetos nem nas preferências. Se a versão instalada for mais nova que o instalador, ele pergunta antes de voltar atrás (e recusa no modo silencioso).
 - `Bordadox-<versão>-portable.zip`: versão portátil. Extraia em qualquer pasta e execute `Bordadox.App.exe`.
 
-Versão atual: **0.8.0** (`dist/Bordadox-0.8.0-setup.exe`, cerca de 44 MB, e `dist/Bordadox-0.8.0-portable.zip`, cerca de 61 MB).
+Versão atual: **0.8.2** (`dist/Bordadox-0.8.2-setup.exe`, cerca de 44 MB, e `dist/Bordadox-0.8.2-portable.zip`, cerca de 61 MB).
 A pasta `dist/` não vai para o Git: gere os pacotes com o comando abaixo.
 
 Para gerar os dois (precisa do .NET 10 SDK e do [Inno Setup 6](https://jrsoftware.org/isdl.php)):
@@ -277,7 +278,7 @@ detecção de fotos, digitalização de ponta a ponta com imagens reais, aplique
   poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
 - **A estimativa de pontos** da janela é aproximada (erro de uns 10% nos logos de teste; o valor final, depois de gerar, é exato).
 - Formatos: **PES** (validado na máquina), **DST**, **EXP**, **JEF** e **VP3** (estes quatro sem validação em máquina ou software da marca; o PES é o recomendado para a NQ1400E).
-- **.emb da Wilcom não abre**: é um arquivo composto OLE2 cujos dados do desenho (fluxos `DesignDocument` e `CorelDocument`) não são compactação comum e têm entropia de dado cifrado; sem especificação pública, o Bordadox não os lê. Ao abrir um .emb, a janela mostra a miniatura guardada nele, explica como exportar como DST/PES no Wilcom (ou com o Wilcom TrueSizer, que abre .emb e converte) e, se houver na mesma pasta o mesmo desenho em DST/PES/EXP/JEF/VP3, oferece abri-lo.
+- **.emb da Wilcom não abre**: é um arquivo composto OLE2 cujos dados do desenho (fluxos `DesignDocument` e `CorelDocument`) não são compactação comum e têm entropia de dado cifrado; sem especificação pública, o Bordadox não os lê. Ao abrir um .emb, a janela mostra a miniatura guardada nele, explica como exportar como DST/PES no Wilcom (ou com o Wilcom TrueSizer, que abre .emb e converte) e, se houver na mesma pasta o mesmo desenho em DST/PES/EXP/JEF/VP3, oferece abri-lo. A janela também tem **"Abrir no programa da Wilcom"** (abre o .emb no programa associado) e **"Abrir o TrueSizer (navegador)"** ([wilcom.com/workspace/truesizer](https://wilcom.com/workspace/truesizer), serviço por assinatura da Wilcom): depois de abrir, o Bordadox fica observando a pasta do .emb, Downloads e a Área de Trabalho e abre sozinho o DST/PES/EXP/JEF/VP3 de mesmo nome assim que você salvar, completo e não mais crescendo. Não é uma conversão automática: a Wilcom não oferece linha de comando para o TrueSizer.
 - Somente **Windows** (WPF).
 
 ---

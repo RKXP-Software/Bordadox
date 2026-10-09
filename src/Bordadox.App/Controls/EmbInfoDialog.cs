@@ -1,17 +1,22 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Bordadox.Core.Formats;
 
 namespace Bordadox.App.Controls;
 
 /// <summary>
-/// Explica por que um .emb da Wilcom não abre e mostra a miniatura guardada nele. Se existe, na mesma pasta, o mesmo desenho
-/// exportado em outro formato (DST, PES...), oferece abri-lo.
+/// Explica por que um .emb da Wilcom não abre e mostra a miniatura guardada nele. Oferece três caminhos:
+/// abrir o mesmo desenho em DST/PES se ele já existe ao lado; abrir o .emb no programa da Wilcom instalado; ou abrir o Wilcom TrueSizer
+/// no navegador. Nos dois últimos a janela fica esperando o usuário salvar o desenho convertido (DST, PES...) e o abre sozinha.
 /// </summary>
 public sealed class EmbInfoDialog : Window
 {
+    private const string TrueSizerUrl = "https://wilcom.com/workspace/truesizer";
     private static readonly string[] SidecarExtensions = { "dst", "pes", "exp", "jef", "vp3" };
 
     /// <summary>Caminho do mesmo desenho em outro formato, ao lado do .emb (mesmo nome), ou null.</summary>
@@ -28,15 +33,21 @@ public sealed class EmbInfoDialog : Window
         return null;
     }
 
-    /// <summary>Caminho a abrir no lugar do .emb, se o usuário escolheu; null se só fechou.</summary>
+    private readonly string _embPath;
+    private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 12, 0, 0), Visibility = Visibility.Collapsed, FontWeight = FontWeights.SemiBold };
+    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private ConvertedFileFinder? _finder;
+
+    /// <summary>Caminho a abrir no lugar do .emb, se o usuário escolheu ou se o arquivo convertido apareceu; null se só fechou.</summary>
     public string? OpenInstead { get; private set; }
 
     public EmbInfoDialog(Window owner, string embPath, WilcomEmbException info, string? sidecar)
     {
+        _embPath = embPath;
         if (owner.IsLoaded) Owner = owner;   // na abertura pela linha de comando a janela principal ainda não foi mostrada
         Title = "Arquivo .emb da Wilcom";
         SizeToContent = SizeToContent.WidthAndHeight;
-        MaxWidth = 560;
+        MaxWidth = 600;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = owner.IsLoaded ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen;
         ShowInTaskbar = false;
@@ -63,7 +74,7 @@ public sealed class EmbInfoDialog : Window
             }
             catch (Exception) { /* miniatura inválida: segue sem ela */ }
         }
-        row.Children.Add(new TextBlock { Text = info.Message, TextWrapping = TextWrapping.Wrap, Width = 380 });
+        row.Children.Add(new TextBlock { Text = info.Message, TextWrapping = TextWrapping.Wrap, Width = 420 });
         panel.Children.Add(row);
 
         if (sidecar != null)
@@ -73,17 +84,89 @@ public sealed class EmbInfoDialog : Window
                 TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0), FontWeight = FontWeights.SemiBold,
             });
 
-        var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 16, 0, 0) };
-        if (sidecar != null)
+        panel.Children.Add(_status);
+
+        var buttons = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 14, 0, 0) };
+        Button Make(string text, bool isDefault = false)
         {
-            var open = new Button { Content = $"Abrir {Path.GetFileName(sidecar)}", Padding = new Thickness(14, 5, 14, 5), Margin = new Thickness(0, 0, 8, 0), IsDefault = true };
-            open.Click += (_, _) => { OpenInstead = sidecar; DialogResult = true; };
-            buttons.Children.Add(open);
+            var b = new Button { Content = text, Padding = new Thickness(12, 5, 12, 5), Margin = new Thickness(8, 4, 0, 0), IsDefault = isDefault };
+            buttons.Children.Add(b);
+            return b;
         }
-        var close = new Button { Content = "Fechar", Padding = new Thickness(14, 5, 14, 5), IsCancel = true, IsDefault = sidecar == null };
+        if (sidecar != null)
+            Make($"Abrir {Path.GetFileName(sidecar)}", isDefault: true).Click += (_, _) => { OpenInstead = sidecar; DialogResult = true; };
+
+        var wilcom = Make("Abrir no programa da Wilcom");
+        wilcom.ToolTip = "Abre o .emb no programa associado a ele (Wilcom EmbroideryStudio, TrueSizer...). Salve lá o desenho como DST ou PES e o Bordadox o abre sozinho.";
+        wilcom.Click += (_, _) => OpenInWilcomProgram();
+
+        var web = Make("Abrir o TrueSizer (navegador)");
+        web.ToolTip = "Abre o site do Wilcom TrueSizer. Abra o .emb lá, exporte como DST ou PES (o arquivo vai para Downloads) e o Bordadox o abre sozinho.";
+        web.Click += (_, _) => OpenTrueSizer();
+
+        var close = Make("Fechar");
+        close.IsCancel = true;
+        close.IsDefault = sidecar == null;
         close.Click += (_, _) => DialogResult = false;
-        buttons.Children.Add(close);
-        panel.Children.Add(buttons);
+
+        _timer.Tick += (_, _) => CheckForConvertedFile();
+        Closing += OnClosing;
         Content = panel;
     }
+
+    private void OpenInWilcomProgram()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(_embPath) { UseShellExecute = true });
+        }
+        catch (Win32Exception)
+        {
+            ShowStatus("Nenhum programa da Wilcom está associado aos arquivos .emb neste computador. Use o TrueSizer pelo navegador.", waiting: false);
+            return;
+        }
+        StartWaiting();
+    }
+
+    private void OpenTrueSizer()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(TrueSizerUrl) { UseShellExecute = true });
+        }
+        catch (Win32Exception)
+        {
+            ShowStatus($"Não consegui abrir o navegador. Acesse {TrueSizerUrl}.", waiting: false);
+            return;
+        }
+        StartWaiting();
+    }
+
+    private void StartWaiting()
+    {
+        _finder = new ConvertedFileFinder(_embPath, ConvertedFileFinder.CommonFolders(), DateTime.Now);
+        var folders = string.Join(", ", _finder.Folders.Select(f => Path.GetFileName(f.TrimEnd('\\', '/')) is { Length: > 0 } n ? n : f));
+        ShowStatus($"Aguardando o desenho convertido: salve-o como DST ou PES com o nome \"{Path.GetFileNameWithoutExtension(_embPath)}\" " +
+                   $"(pastas observadas: {folders}). Quando o arquivo aparecer, o Bordadox o abre sozinho.", waiting: true);
+        _timer.Start();
+    }
+
+    private void ShowStatus(string text, bool waiting)
+    {
+        _status.Text = (waiting ? "⏳ " : "⚠ ") + text;
+        _status.Visibility = Visibility.Visible;
+        if (!waiting) _timer.Stop();
+    }
+
+    private void CheckForConvertedFile()
+    {
+        if (_finder?.Poll() is { } path)
+        {
+            _timer.Stop();
+            OpenInstead = path;
+            DialogResult = true;
+        }
+    }
+
+    private void OnClosing(object? sender, CancelEventArgs e) => _timer.Stop();
 }

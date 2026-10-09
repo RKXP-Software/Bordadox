@@ -34,7 +34,12 @@ Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 ChangesAssociations=yes
+; Atualização: o mesmo AppId faz a nova versão instalar por cima da antiga, na mesma pasta e com as mesmas opções.
+UsePreviousAppDir=yes
+UsePreviousTasks=yes
 CloseApplications=yes
+CloseApplicationsFilter=*.exe,*.dll
+RestartApplications=yes
 VersionInfoVersion={#Versao}
 
 [Languages]
@@ -74,3 +79,57 @@ Root: HKA; Subkey: "Software\Classes\.vp3\OpenWithList\Bordadox.App.exe"; ValueT
 
 [Run]
 Filename: "{app}\Bordadox.App.exe"; Description: "{cm:LaunchProgram,Bordadox}"; Flags: nowait postinstall skipifsilent
+
+[InstallDelete]
+; Na atualização, tira o que sobrou de versões anteriores (bibliotecas renomeadas ou removidas) antes de copiar os arquivos novos.
+; Só mexe em tipos de arquivo do próprio programa, nunca na pasta inteira.
+Type: files; Name: "{app}\*.dll"
+Type: files; Name: "{app}\*.deps.json"
+Type: files; Name: "{app}\*.runtimeconfig.json"
+Type: files; Name: "{app}\LEIA-ME.txt"
+
+[Code]
+const
+  UninstallKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{EC107889-1B04-4332-96D2-D38906E2D91A}_is1';
+
+var
+  InstalledVersion: String;
+
+// Versão já instalada (por usuário ou para todos), ou vazio se não há instalação.
+function ReadInstalledVersion(): String;
+begin
+  Result := '';
+  if not RegQueryStringValue(HKCU, UninstallKey, 'DisplayVersion', Result) then
+    if not RegQueryStringValue(HKLM, UninstallKey, 'DisplayVersion', Result) then
+      Result := '';
+end;
+
+function InitializeSetup(): Boolean;
+var
+  Old, New: Int64;
+begin
+  Result := True;
+  InstalledVersion := ReadInstalledVersion();
+  if InstalledVersion = '' then Exit;
+  if StrToVersion(InstalledVersion, Old) and StrToVersion('{#Versao}', New) then
+    if ComparePackedVersion(Old, New) > 0 then
+    begin
+      // A versão instalada é mais nova que este instalador: não volta atrás sem o usuário confirmar (e nunca no modo silencioso).
+      if WizardSilent then
+        Result := False
+      else
+        Result := MsgBox('O Bordadox ' + InstalledVersion + ' já está instalado, e é mais novo que esta versão ({#Versao}).' + #13#10 + #13#10 +
+                         'Deseja instalar a versão mais antiga por cima mesmo assim?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES;
+    end;
+end;
+
+// Na tela "Pronto para instalar", avisa que é uma atualização.
+function UpdateReadyMemo(Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo, MemoComponentsInfo, MemoGroupInfo, MemoTasksInfo: String): String;
+begin
+  Result := '';
+  if InstalledVersion <> '' then
+    Result := 'Atualização do Bordadox da versão ' + InstalledVersion + ' para a {#Versao}.' + NewLine +
+              'Seus projetos e preferências não são alterados.' + NewLine + NewLine;
+  if MemoDirInfo <> '' then Result := Result + MemoDirInfo + NewLine + NewLine;
+  if MemoTasksInfo <> '' then Result := Result + MemoTasksInfo;
+end;
