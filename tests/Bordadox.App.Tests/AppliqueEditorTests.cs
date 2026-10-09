@@ -172,3 +172,25 @@ public class ExplodeEditorTests
         Assert.Single(e.Design.Objects);
     }
 }
+
+public class MenuTests
+{
+    private static string Xaml()
+    {
+        var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null && !System.IO.File.Exists(System.IO.Path.Combine(dir.FullName, "src", "Bordadox.App", "MainWindow.xaml"))) dir = dir.Parent;
+        return dir == null ? "" : System.IO.File.ReadAllText(System.IO.Path.Combine(dir.FullName, "src", "Bordadox.App", "MainWindow.xaml"));
+    }
+
+    [Theory]
+    [InlineData("Explode_Click")]
+    [InlineData("ToApplique_Click")]
+    [InlineData("ToFill_Click")]
+    [InlineData("ProductionSheet_Click")]
+    public void EveryCommandHandler_IsReachableFromTheMenu(string handler)
+    {
+        var xaml = Xaml();
+        if (xaml.Length == 0) return;      // fora do repositório (sem as fontes)
+        Assert.Contains($"Click=\"{handler}\"", xaml);
+    }
+}

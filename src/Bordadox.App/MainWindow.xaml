@@ -100,6 +100,7 @@
                 <Separator />
                 <MenuItem Header="Converter em a_plique" Click="ToApplique_Click" ToolTip="Transforma o preenchimento selecionado num aplique (guia, fixação e acabamento)." />
                 <MenuItem Header="Converter em pre_enchimento" Click="ToFill_Click" />
+                <MenuItem Header="E_xplodir (separar em partes)" Click="Explode_Click" ToolTip="Separa o objeto selecionado em partes independentes: texto em letras, pontos importados em trechos, aplique e degradê em passos." />
                 <Separator />
                 <MenuItem Header="Costurar _antes" Click="SeqUp_Click" InputGestureText="Ctrl+↑" />
                 <MenuItem Header="Costurar _depois" Click="SeqDown_Click" InputGestureText="Ctrl+↓" />
