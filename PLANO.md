@@ -45,7 +45,7 @@ Limitações conhecidas das letras:
 
 ## Fase 5 — Avançado
 
-### Etapa 5a — Auto-digitalização de imagem (parcial; retomar daqui)
+### Etapa 5a — Auto-digitalização de imagem ✅ (concluída)
 **Pronto e testado:** Arquivo › Digitalizar imagem (Ctrl+I, ou arrastar/Abrir uma imagem) para PNG, JPG, BMP, GIF e SVG.
 Janela com prévia das cores do bordado, tamanho em mm (a largura vale para o desenho, sem a margem), número de cores,
 remoção de fundo, detalhe mínimo e tipo de preenchimento. Reduz cores (k-means em Lab), liga cada cor a uma linha Brother,
@@ -60,12 +60,12 @@ A redução de cores no modo automático passou a usar todos os pixels e descart
 Logo de teste: `amostras/beauty time_Prancheta 1-01.png` (borboleta dourada sobre preto) agora sai completo.
 A janela de digitalização tem zoom na prévia (roda do mouse, arrastar, botões − + Ajustar).
 
-**Pendente (nesta ordem):**
-1. Degradê metálico (várias tonalidades de dourado) vira camadas separadas; avaliar fundir tons por matiz.
-2. Cores Brother: o dourado cai em "Cáqui"/"Marrom claro"; avaliar uma distância de cor melhor que a do PEC (redmean).
-3. A estimativa de pontos da janela (1,9 pontos/mm²) subestima logos de linha fina (estimou ~860, o real foi ~1.800).
-4. Fios com espessura perto de 1,2 mm podem alternar entre linha e preenchimento ao longo do traço (histerese).
-5. Linhas finas que se cruzam saem como vários trechos separados; ligar os trechos numa linha contínua reduziria cortes.
+**Acabamento: PRONTO** (etapa 5a concluída):
+1. ✅ Degradê metálico: `ShadeMerger` une tons da mesma família de cor (matiz parecido, encostados e com transição suave na imagem original; a divisa seca entre duas cores chapadas impede a união). Opção "Unir tons do mesmo degradê" na janela.
+2. ✅ Cores Brother: a linha mais próxima agora é escolhida por CIEDE2000 (antes, distância em RGB). O dourado do logo Faustino passou de "Marrom claro" para "Latão".
+3. ✅ Estimativa de pontos por forma (satin/tatami pela largura, linha fina pelo comprimento do esqueleto): erro de -7% a +2% nos logos de teste (antes, de -55% a +13%).
+4. ✅ Histerese: um fio que oscila em torno de 1,2 mm fica todo como linha (trecho grosso só vale se tiver uma parte claramente grossa).
+5. ✅ Cruzamentos e bifurcações de linhas finas: `Skeleton.JoinAtJunctions` liga os braços que seguem em frente (2 linhas inteiras em vez de 4 pedaços), e o nó do cruzamento deixou de virar um remendo de preenchimento. Borboleta: 84 → 46 objetos, 54 → 37 cortes.
 
 ### Pedidos do usuário ainda na fila
 - **Identidade visual (no final do projeto):** logo do Bordadox, por exemplo um "X" sendo bordado; ícone do app (.ico) e da janela, e tela de abertura.

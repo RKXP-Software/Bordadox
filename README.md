@@ -235,11 +235,10 @@ vetorização, esqueleto de traços finos, detecção de fotos e digitalização
 - **Sem kerning** entre pares de letras.
 - **Deslocamentos dentro de um preenchimento** que se divide em partes (letras como o, a, B) ainda geram cortes; o ideal seria
   caminhar por baixo do preenchimento.
-- **Digitalização:** logos de cores chapadas e de linha fina funcionam; **fotos e degradês** viram poucas cores (com aviso).
-  Um degradê metálico (várias tonalidades de dourado) pode virar camadas separadas. O dourado cai em "Cáqui"/"Marrom claro"
-  porque a paleta Brother tem poucas cores.
-- **Linhas finas que se cruzam** saem como vários trechos separados (mais cortes do que o ideal).
-- **A estimativa de pontos** da janela de digitalização subestima logos de linha fina (o valor final, depois de gerar, é exato).
+- **Digitalização:** logos de cores chapadas e de linha fina funcionam; **fotos** viram poucas cores (com aviso). Degradês suaves
+  de uma cor só (dourado metálico) viram uma cor; degradês entre cores diferentes continuam em faixas. A paleta Brother tem
+  poucas cores, então o dourado vira "Cáqui" ou "Latão" conforme o tom.
+- **A estimativa de pontos** da janela é aproximada (erro de uns 10% nos logos de teste; o valor final, depois de gerar, é exato).
 - Formatos suportados apenas **PES e DST**.
 - Somente **Windows** (WPF).
 
@@ -249,12 +248,7 @@ vetorização, esqueleto de traços finos, detecção de fotos e digitalização
 
 Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 
-**Digitalização de imagens (etapa 5a, acabamento)**
-- Fundir tonalidades de um mesmo degradê metálico em uma só camada.
-- Melhor escolha da linha Brother mais próxima (a distância de cor atual é simples).
-- Estimativa de pontos mais precisa para linha fina.
-- Ligar numa linha contínua os trechos de linhas finas que se cruzam.
-- Evitar que fios de espessura próxima do limite alternem entre linha e preenchimento.
+**Digitalização de imagens (etapa 5a):** concluída (degradê, cores Brother por CIEDE2000, estimativa de pontos, histerese e ligação de linhas que se cruzam).
 
 **Novos recursos (fase 5)**
 - **Aplique:** linha de posicionamento, de fixação e acabamento em satin.

@@ -27,6 +27,9 @@ public sealed class DigitizeOptions
 
     public FillMode FillMode { get; set; } = FillMode.Auto;
 
+    /// <summary>Une os tons de um mesmo degradê (ex.: dourado metálico) numa cor só. Ver <see cref="ShadeMerger"/>.</summary>
+    public bool MergeShades { get; set; } = true;
+
     /// <summary>Quanto cada cor de baixo avança por baixo da cor de cima, para não aparecer tecido entre elas.</summary>
     public double OverlapMm { get; set; } = 0.25;
 
@@ -156,6 +159,7 @@ public static class AutoDigitizer
         // Imagem ampliada tem borda suavizada larga (1 pixel original vira vários): o filtro de borda acompanha.
         int edgeRadius = Math.Max(1, (int)Math.Round(w / (double)source.Width));
         var q = Quantizer.Run(img, o.Quantize, ct, edgeRadius);
+        if (o.MergeShades && o.Quantize.Auto) q = ShadeMerger.Merge(q, img, edgeRadius);
         var labels = q.Labels;
         var threads = MapToThreads(q, labels);
 
@@ -170,6 +174,87 @@ public static class AutoDigitizer
             Labels = labels, Threads = threads, Background = q.Background,
         };
     }
+
+
+    /// <summary>
+    /// Estimativa do número de pontos sem gerar os objetos: o que é fino vira linha (comprimento do esqueleto × pontos por mm
+    /// do ponto corrido triplo), o resto é preenchimento (ver <see cref="EstimateFill"/>). Só área daria quase a metade
+    /// do valor real em logos de linha fina.
+    /// </summary>
+    public static int EstimateStitches(PreparedImage prep, DigitizeOptions o, CancellationToken ct = default)
+    {
+        int w = prep.Width, h = prep.Height, n = w * h;
+        double ppm = prep.PixelsPerMm, total = 0;
+        int radius = Math.Max(1, (int)Math.Round(o.ThinMaxMm * ppm / 2));
+        double perMm = 3.0 / 2.0 * 1.3;   // triplo com ponto de 2,0 mm = 1,5 por mm; +30% de arremates e curvas (medido no logo da borboleta)
+
+        for (int l = 0; l < prep.Threads.Count; l++)
+        {
+            ct.ThrowIfCancellationRequested();
+            var mask = new bool[n];
+            int area = 0;
+            for (int i = 0; i < n; i++) if (prep.Labels[i] == l) { mask[i] = true; area++; }
+            if (area == 0) continue;
+
+            var fillMask = mask;
+            int thinPixels = 0;
+            double lineMm = 0;
+            if (o.ThinLines)
+            {
+                var thin = Skeleton.ThinPart(mask, w, h, radius, ct);
+                thinPixels = thin.Count(t => t);
+                if (thinPixels > 0)
+                {
+                    var skeleton = Skeleton.Thin(thin, w, h, ct);
+                    Skeleton.Prune(skeleton, w, h, (int)Math.Ceiling(o.SpurMm * ppm));
+                    lineMm = skeleton.Count(s => s) * 1.1 / ppm;   // 1,1: passos na diagonal são mais longos
+                    fillMask = new bool[n];
+                    for (int i = 0; i < n; i++) fillMask[i] = mask[i] && !thin[i];
+                }
+            }
+            total += lineMm * perMm;
+            foreach (var shape in ContourTracer.Trace(fillMask, w, h, ct))
+                total += EstimateFill(shape, ppm, o) * 1.12;   // +12%: deslocamentos e arremates entre objetos (medido: -9% a -16% sem isto)
+        }
+        return (int)Math.Round(total);
+    }
+
+
+    /// <summary>
+    /// Pontos de um preenchimento, pelo mesmo critério da digitalização: a largura média (2·área/perímetro) decide satin ou
+    /// tatami. Satin dá uma linha de pontos a cada 0,4 mm ao longo da forma (2,5·área/largura); tatami, uma fileira a cada
+    /// 0,4 mm com pontos de 3,5 mm (0,71 por mm²).
+    /// </summary>
+    /// <summary>Comprimento de um contorno em escada de pixels, medido de 4 em 4 pontos (a escada diagonal não conta o dobro).</summary>
+    private static double SmoothLength(List<PointI> ring)
+    {
+        if (ring.Count < 2) return 0;
+        const int step = 4;
+        double sum = 0;
+        for (int i = 0; i < ring.Count; i += step)
+        {
+            var a = ring[i]; var b = ring[(i + step) % ring.Count];
+            sum += Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+        }
+        return sum;
+    }
+
+    private static double EstimateFill(Shape shape, double ppm, DigitizeOptions o)
+    {
+        double areaMm2 = shape.Area / (ppm * ppm);
+        if (areaMm2 < o.MinDetailMm * o.MinDetailMm * 0.7) return 0;
+        double perimeterMm = (SmoothLength(shape.Outer) + shape.Holes.Sum(SmoothLength)) / ppm;
+        double widthMm = 2 * areaMm2 / Math.Max(1e-6, perimeterMm);
+        if (widthMm < o.MinWidthMm) return 0;
+        bool satin = o.FillMode switch { FillMode.Satin => true, FillMode.Tatami => false, _ => widthMm <= o.SatinMaxWidthMm };
+        bool underlay = areaMm2 > 6 && widthMm > 1.5;
+        // Fatores ajustados contando os pontos reais de logos de teste: o satin com base (zigue-zague) leva quase o dobro;
+        // no tatami, formas estreitas têm fileiras curtas (cada fileira arredonda para cima os pontos) e a base pesa mais.
+        return satin
+            ? 2.5 * areaMm2 / widthMm * (underlay ? 1.9 : 1.15)
+            : areaMm2 / (0.4 * 3.5) * (1.3 + 3.5 / Math.Max(1.0, widthMm));
+    }
+
 
     public static DigitizeResult Run(RgbaImage source, DigitizeOptions o, IProgress<DigitizeProgress>? progress = null, CancellationToken ct = default)
     {
@@ -215,7 +300,7 @@ public static class AutoDigitizer
                 {
                     var skeleton = Skeleton.Thin(thin, w, h, ct);
                     Skeleton.Prune(skeleton, w, h, (int)Math.Ceiling(o.SpurMm * ppm));
-                    foreach (var line in MakeLines(Skeleton.Trace(skeleton, w, h, ct), skeleton, w, h, ppm, ToMm, o, thread))
+                    foreach (var line in MakeLines(Skeleton.JoinAtJunctions(Skeleton.Trace(skeleton, w, h, ct), skeleton, w, h, Math.Max(3, radius), 2 * Math.Max(3, radius) + 2), skeleton, w, h, ppm, ToMm, o, thread))
                     {
                         made.Add(line);
                         result.ThinLines++;

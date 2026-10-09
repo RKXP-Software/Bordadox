@@ -1,3 +1,5 @@
+using Bordadox.Core.Digitize;
+
 namespace Bordadox.Core.Stitches;
 
 public sealed record ThreadColor(byte R, byte G, byte B, string Name, string Code)
@@ -90,13 +92,17 @@ public static class BrotherPalette
     /// <summary>Índices de cores bem distintas entre si, usadas quando o arquivo não informa as cores (ex.: DST).</summary>
     public static readonly IReadOnlyList<int> ContrastSequence = new[] { 2, 5, 37, 13, 20, 7, 12, 32, 24, 43, 3, 22, 58, 39, 28, 54 };
 
-    /// <summary>Índice PEC (1..64) da cor mais próxima.</summary>
+    private static readonly Lab[] PaletteLab = Colors.Select(c => ColorSpace.ToLab(c.R, c.G, c.B)).ToArray();
+
+    /// <summary>Índice PEC (1..64) da cor mais próxima, medida com CIEDE2000 (percepção), não em RGB.</summary>
     public static int NearestIndex(ThreadColor c)
     {
-        int best = 1, bestD = int.MaxValue;
+        var lab = ColorSpace.ToLab(c.R, c.G, c.B);
+        int best = 1;
+        double bestD = double.MaxValue;
         for (int i = 1; i < Colors.Count; i++)
         {
-            var d = Colors[i].DistanceSquared(c);
+            var d = DeltaE2000.Between(lab, PaletteLab[i]);
             if (d < bestD) { bestD = d; best = i; }
         }
         return best;

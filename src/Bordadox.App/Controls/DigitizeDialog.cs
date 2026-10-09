@@ -27,7 +27,6 @@ public sealed class DigitizeDialog : Window
     // Acima disto o projeto fica pesado: pede confirmação do usuário antes de entrar no desenho.
     private const int HeavyObjects = 300;
     private const int HeavyStitches = 120_000;
-    private const double StitchesPerMm2 = 1.9; // média medida nos logos de teste (varia de 1,7 a 2,3)
 
     private readonly LoadedImage _loaded;
     private readonly ImageAnalysis _analysis;
@@ -43,6 +42,11 @@ public sealed class DigitizeDialog : Window
     private readonly CheckBox _autoColors = new() { Content = "Automático (une cores parecidas)", IsChecked = true };
     private readonly Slider _colors = new() { Minimum = 2, Maximum = 12, Value = 8, TickFrequency = 1, IsSnapToTickEnabled = true, Width = 190 };
     private readonly TextBlock _colorsLabel = new() { Width = 70, VerticalAlignment = VerticalAlignment.Center };
+    private readonly CheckBox _mergeShades = new()
+    {
+        Content = new TextBlock { Text = "Unir tons do mesmo degradê (ex.: dourado metálico vira uma cor só)", TextWrapping = TextWrapping.Wrap },
+        IsChecked = true,
+    };
     private readonly CheckBox _removeBg = new() { Content = "Remover o fundo", IsChecked = true };
     private readonly CheckBox _enclosedBg = new()
     {
@@ -204,6 +208,8 @@ public sealed class DigitizeDialog : Window
 
         panel.Children.Add(Header("Cores"));
         panel.Children.Add(_autoColors);
+        _mergeShades.Margin = new Thickness(0, 4, 0, 0);
+        panel.Children.Add(_mergeShades);
         var colorsRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 0) };
         colorsRow.Children.Add(new TextBlock { Text = "Até ", VerticalAlignment = VerticalAlignment.Center });
         colorsRow.Children.Add(_colors);
@@ -231,7 +237,7 @@ public sealed class DigitizeDialog : Window
         panel.Children.Add(_summary);
 
         // Tudo isto some do jogo no modo "só fundo": nada é digitalizado.
-        _digitizeOnly.AddRange(new UIElement[] { _autoColors, _colors, _removeBg, _enclosedBg, _detail, _fillMode, _keepReference, _swatches });
+        _digitizeOnly.AddRange(new UIElement[] { _autoColors, _mergeShades, _colors, _removeBg, _enclosedBg, _detail, _fillMode, _keepReference, _swatches });
 
         _riskBox.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xF4, 0xE0));
         _riskBox.BorderBrush = new SolidColorBrush(Color.FromRgb(0xE0, 0xA0, 0x50));
@@ -275,7 +281,8 @@ public sealed class DigitizeDialog : Window
     {
         _width.TextChanged += (_, _) => { if (!_syncing) { _userSized = true; SizeEdited(fromWidth: true); } };
         _height.TextChanged += (_, _) => { if (!_syncing) { _userSized = true; SizeEdited(fromWidth: false); } };
-        _autoColors.Click += (_, _) => { UpdateLabels(); QueuePreview(); };
+        _autoColors.Click += (_, _) => { _mergeShades.IsEnabled = _autoColors.IsChecked == true; UpdateLabels(); QueuePreview(); };
+        _mergeShades.Click += (_, _) => QueuePreview();
         _colors.ValueChanged += (_, _) => { UpdateLabels(); QueuePreview(); };
         _removeBg.Click += (_, _) => { _enclosedBg.IsEnabled = _removeBg.IsChecked == true; QueuePreview(); };
         _enclosedBg.Click += (_, _) => QueuePreview();
@@ -302,6 +309,7 @@ public sealed class DigitizeDialog : Window
     {
         _backgroundOnly = on;
         foreach (var c in _digitizeOnly) c.IsEnabled = !on;
+        _mergeShades.IsEnabled = !on && _autoColors.IsChecked == true;
         _showPreview.IsEnabled = !on;
         _riskBox.Visibility = on || _riskBox.Child == null ? Visibility.Collapsed : Visibility.Visible;
         _ok.Content = on ? "Inserir como fundo" : "Digitalizar";
@@ -453,6 +461,7 @@ public sealed class DigitizeDialog : Window
             WidthMm = WidthMm,
             MinDetailMm = _detail.Value,
             FillMode = (FillMode)((ComboBoxItem)_fillMode.SelectedItem).Tag,
+            MergeShades = _mergeShades.IsChecked == true,
         };
         var q = CurrentQuantize();
         o.Quantize.MaxColors = q.MaxColors;
@@ -462,7 +471,7 @@ public sealed class DigitizeDialog : Window
         return o;
     }
 
-    private sealed record PreviewData(BitmapSource Bitmap, List<(ThreadColor Thread, double AreaMm2)> Colors, double Aspect, double TotalAreaMm2);
+    private sealed record PreviewData(BitmapSource Bitmap, List<(ThreadColor Thread, double AreaMm2)> Colors, double Aspect, double TotalAreaMm2, int Stitches);
 
     private void RefreshPreview()
     {
@@ -508,14 +517,15 @@ public sealed class DigitizeDialog : Window
 
         var colors = Enumerable.Range(0, prep.Threads.Count).Where(i => count[i] > 0)
             .Select(i => (prep.Threads[i], count[i] / (ppm * ppm))).OrderByDescending(c => c.Item2).ToList();
-        return new PreviewData(bmp, colors, prep.HeightMm / prep.WidthMm, colors.Sum(c => c.Item2));
+        var stitches = AutoDigitizer.EstimateStitches(prep, options, ct);
+        return new PreviewData(bmp, colors, prep.HeightMm / prep.WidthMm, colors.Sum(c => c.Item2), stitches);
     }
 
     private void ApplyPreview(PreviewData p)
     {
         _previewBitmap = p.Bitmap;
         _previewReady = true;
-        _estimatedStitches = p.TotalAreaMm2 * StitchesPerMm2;
+        _estimatedStitches = p.Stitches;
         _contentAspect = p.Aspect;
         if (_backgroundOnly) { UpdateOkEnabled(); return; } // o usuário mudou de ideia durante o cálculo: ignora a prévia
 

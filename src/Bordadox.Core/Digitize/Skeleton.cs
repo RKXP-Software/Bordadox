@@ -16,7 +16,7 @@ public static class Skeleton
         var thin = new bool[mask.Length];
         if (!TryBounds(mask, w, h, out int x0, out int y0, out int x1, out int y1)) return thin;
 
-        int m = radius + 2;
+        int m = radius + Math.Max(1, radius / 4) + 3;
         x0 = Math.Max(0, x0 - m); y0 = Math.Max(0, y0 - m);
         x1 = Math.Min(w - 1, x1 + m); y1 = Math.Min(h - 1, y1 + m);
         int cw = x1 - x0 + 1, ch = y1 - y0 + 1;
@@ -28,10 +28,25 @@ public static class Skeleton
         // Abertura = erosão seguida de dilatação (a erosão é a dilatação do vazio).
         var inverse = new bool[local.Length];
         for (int i = 0; i < local.Length; i++) inverse[i] = !local[i];
-        var eroded = LabelCleaner.Dilate(inverse, cw, ch, radius);
-        for (int i = 0; i < eroded.Length; i++) eroded[i] = !eroded[i];
-        ct.ThrowIfCancellationRequested();
-        var opened = LabelCleaner.Dilate(eroded, cw, ch, radius);
+        bool[] Open(int r)
+        {
+            var eroded = LabelCleaner.Dilate(inverse, cw, ch, r);
+            for (int i = 0; i < eroded.Length; i++) eroded[i] = !eroded[i];
+            ct.ThrowIfCancellationRequested();
+            return LabelCleaner.Dilate(eroded, cw, ch, r);
+        }
+        var opened = Open(radius);
+
+        // Histerese: um trecho "grosso" só vale se alguma parte dele for CLARAMENTE grossa (raio maior). Um fio que oscila
+        // em torno do limite de espessura (1,1 a 1,3 mm) não tem nenhuma parte assim e fica todo como linha, em vez de
+        // alternar entre linha e remendos de preenchimento.
+        var strong = Open(radius + Math.Max(1, radius / 4));
+        var blobs = new int[local.Length];
+        for (int i = 0; i < local.Length; i++) blobs[i] = opened[i] ? 1 : 0;
+        var blobMap = ComponentMap.Build(blobs, cw, ch, ct);
+        var hasStrong = new bool[blobMap.Items.Count];
+        for (int i = 0; i < local.Length; i++) if (opened[i] && strong[i]) hasStrong[blobMap.Id[i]] = true;
+        for (int i = 0; i < local.Length; i++) if (opened[i] && !hasStrong[blobMap.Id[i]]) opened[i] = false;
 
         // A abertura arredonda os cantos das partes grossas. Recupera os cantos dilatando só um pouco (metade do raio),
         // sem sair da máscara: dilatar o raio inteiro engoliria vários milímetros de qualquer fio ligado à forma.
@@ -44,11 +59,50 @@ public static class Skeleton
         var parts = ComponentMap.Build(leftover, cw, ch, ct);
         int minPart = 2 * radius * radius;
 
+        // Cruzamentos e bifurcações de fios finos têm um ponto onde a forma é "mais grossa" (duas barras sobrepostas).
+        // Esse remendo pequeno, ligado a 2 ou mais traços finos, é parte do traço e não um preenchimento à parte:
+        // sem isto a linha se parte em quatro no cruzamento.
+        var thickMap = ComponentMap.Build(thick.Select(t => t ? 1 : 0).ToArray(), cw, ch, ct);
+        int comps = thickMap.Items.Count;
+        var minX = new int[comps]; var maxX = new int[comps]; var minY = new int[comps]; var maxY = new int[comps];
+        Array.Fill(minX, int.MaxValue); Array.Fill(minY, int.MaxValue);
+        var attached = new HashSet<int>[comps];
         for (int y = 0; y < ch; y++)
             for (int x = 0; x < cw; x++)
             {
                 int i = y * cw + x;
-                if (leftover[i] == 1 && parts.Items[parts.Id[i]].Area >= minPart) thin[(y + y0) * w + x + x0] = true;
+                if (!thick[i]) continue;
+                int c = thickMap.Id[i];
+                if (x < minX[c]) minX[c] = x; if (x > maxX[c]) maxX[c] = x;
+                if (y < minY[c]) minY[c] = y; if (y > maxY[c]) maxY[c] = y;
+                void Look(int j)
+                {
+                    if (leftover[j] == 1 && parts.Items[parts.Id[j]].Area >= minPart) (attached[c] ??= new()).Add(parts.Id[j]);
+                }
+                if (x > 0) Look(i - 1);
+                if (x < cw - 1) Look(i + 1);
+                if (y > 0) Look(i - cw);
+                if (y < ch - 1) Look(i + cw);
+            }
+        var junctionPatch = new bool[comps];
+        for (int c = 0; c < comps; c++)
+            junctionPatch[c] = thickMap.Items[c].Label == 1 && attached[c] is { Count: >= 2 }
+                && Math.Max(maxX[c] - minX[c], maxY[c] - minY[c]) + 1 <= 6 * radius;
+        if (junctionPatch.Any(j => j))
+        {
+            // Um nó de cruzamento mal passa de ~1,5x a espessura do fio; uma bolinha ou forma realmente grossa (raio
+            // 2x o do limite) é um preenchimento de verdade, mesmo com fios saindo dela.
+            var huge = Open(2 * radius);
+            for (int i = 0; i < huge.Length; i++)
+                if (huge[i] && thick[i]) junctionPatch[thickMap.Id[i]] = false;
+        }
+
+        for (int y = 0; y < ch; y++)
+            for (int x = 0; x < cw; x++)
+            {
+                int i = y * cw + x;
+                bool part = leftover[i] == 1 && parts.Items[parts.Id[i]].Area >= minPart;
+                if (part || (thick[i] && junctionPatch[thickMap.Id[i]])) thin[(y + y0) * w + x + x0] = true;
             }
         return thin;
     }
@@ -312,5 +366,124 @@ public static class Skeleton
         for (int i = 0; i < n; i++)
             if (skeleton[i] && type[i] == 0) paths.Add(new List<PointI> { P(i) });
         return paths;
+    }
+
+    /// <summary>
+    /// Liga os trechos que se encontram numa bifurcação ou cruzamento em linhas contínuas: em cada encontro, os braços que
+    /// seguem "em frente" um do outro (ângulo de pelo menos ~120°) viram um caminho só. Um cruzamento de duas linhas vira
+    /// duas linhas inteiras, em vez de quatro pedaços; num T, a linha de cima continua e só o braço do T fica separado.
+    /// Menos pedaços significa menos cortes de linha e menos pontos de arremate na máquina.
+    /// </summary>
+    public static List<List<PointI>> JoinAtJunctions(List<List<PointI>> paths, bool[] skeleton, int w, int h,
+        int clusterRadius = 3, int lookAhead = 8, double maxCos = -0.5)
+    {
+        // Pontas de caminhos (token = 2·caminho + 0 para o início, +1 para o fim) que terminam numa bifurcação.
+        var ends = new List<(int Token, PointI P)>();
+        for (int p = 0; p < paths.Count; p++)
+        {
+            var path = paths[p];
+            if (path.Count < 2) continue;
+            if (Branches(skeleton, w, h, path[0].X, path[0].Y) >= 3) ends.Add((2 * p, path[0]));
+            if (Branches(skeleton, w, h, path[^1].X, path[^1].Y) >= 3) ends.Add((2 * p + 1, path[^1]));
+        }
+        if (ends.Count < 2) return paths;
+
+        // Pontas vizinhas (uma bifurcação no esqueleto costuma ter 2-3 pixels de largura) formam um mesmo encontro.
+        var parent = Enumerable.Range(0, ends.Count).ToArray();
+        int Find(int a) { while (parent[a] != a) a = parent[a] = parent[parent[a]]; return a; }
+        for (int i = 0; i < ends.Count; i++)
+            for (int j = i + 1; j < ends.Count; j++)
+                if (Math.Abs(ends[i].P.X - ends[j].P.X) <= clusterRadius && Math.Abs(ends[i].P.Y - ends[j].P.Y) <= clusterRadius)
+                    parent[Find(i)] = Find(j);
+
+        var dropped = new bool[paths.Count];
+        var link = new Dictionary<int, int>();   // token → token da ponta ligada a ele
+
+        (double X, double Y) Direction(int token)
+        {
+            var path = paths[token / 2];
+            bool atStart = token % 2 == 0;
+            var from = atStart ? path[0] : path[^1];
+            int k = Math.Min(path.Count - 1, lookAhead);
+            var to = atStart ? path[k] : path[path.Count - 1 - k];
+            double dx = to.X - from.X, dy = to.Y - from.Y, len = Math.Sqrt(dx * dx + dy * dy);
+            return len < 1e-9 ? (0, 0) : (dx / len, dy / len);
+        }
+
+        foreach (var group in Enumerable.Range(0, ends.Count).GroupBy(Find).Where(g => g.Count() >= 2))
+        {
+            var members = group.Select(i => ends[i].Token).ToList();
+
+            // Trecho curto com as duas pontas no mesmo encontro é só o miolo da bifurcação: não é um braço.
+            foreach (var t in members.ToList())
+            {
+                int p = t / 2;
+                if (!dropped[p] && paths[p].Count <= 2 * clusterRadius + 2 && members.Contains(2 * p) && members.Contains(2 * p + 1))
+                {
+                    dropped[p] = true;
+                    members.Remove(2 * p);
+                    members.Remove(2 * p + 1);
+                }
+            }
+
+            var candidates = new List<(double Cos, int A, int B)>();
+            for (int i = 0; i < members.Count; i++)
+                for (int j = i + 1; j < members.Count; j++)
+                {
+                    var da = Direction(members[i]); var db = Direction(members[j]);
+                    double cos = da.X * db.X + da.Y * db.Y;
+                    if (cos <= maxCos) candidates.Add((cos, members[i], members[j]));
+                }
+            foreach (var (_, a, b) in candidates.OrderBy(c => c.Cos))
+            {
+                if (link.ContainsKey(a) || link.ContainsKey(b)) continue;
+                link[a] = b;
+                link[b] = a;
+            }
+        }
+        if (link.Count == 0 && !dropped.Any(d => d)) return paths;
+
+        // Monta as cadeias: de uma ponta sem ligação, segue o caminho, salta pela ligação, e assim por diante.
+        var result = new List<List<PointI>>();
+        var used = new bool[paths.Count];
+
+        List<PointI> Oriented(int token) // pontos do caminho, começando pela ponta "token"
+        {
+            var p = paths[token / 2];
+            return token % 2 == 0 ? p : Enumerable.Reverse(p).ToList();
+        }
+
+        List<PointI> Chain(int startToken)
+        {
+            var chain = new List<PointI>();
+            int token = startToken;
+            while (true)
+            {
+                int p = token / 2;
+                used[p] = true;
+                foreach (var pt in Oriented(token))
+                    if (chain.Count == 0 || chain[^1] != pt) chain.Add(pt);
+                int other = token ^ 1;                       // a outra ponta do mesmo caminho
+                if (!link.TryGetValue(other, out int next) || used[next / 2]) break;
+                token = next;
+            }
+            return chain;
+        }
+
+        for (int p = 0; p < paths.Count; p++)
+        {
+            if (used[p] || dropped[p]) continue;
+            if (!link.ContainsKey(2 * p)) result.Add(Chain(2 * p));
+            else if (!link.ContainsKey(2 * p + 1)) result.Add(Chain(2 * p + 1));
+        }
+        // O que sobrou está em ciclos (todas as pontas ligadas): vira um caminho fechado.
+        for (int p = 0; p < paths.Count; p++)
+        {
+            if (used[p] || dropped[p]) continue;
+            var chain = Chain(2 * p);
+            if (chain.Count > 3 && chain[0] != chain[^1]) chain.Add(chain[0]);
+            result.Add(chain);
+        }
+        return result;
     }
 }

@@ -83,6 +83,8 @@ public class RealImageTests(ITestOutputHelper output)
 
         output.WriteLine($"   -> {result.WidthMm:0.#} x {result.HeightMm:0.#} mm, {result.Layers.Count} cores, {result.Objects.Count} objetos, " +
                          $"{pattern.StitchCount:N0} pontos, {pattern.TrimCount} cortes (ignorados: {result.SkippedTiny} pequenos, {result.SkippedThin} finos)");
+        var estimate = AutoDigitizer.EstimateStitches(AutoDigitizer.Prepare(loaded.Image, new DigitizeOptions { WidthMm = 100 }), new DigitizeOptions { WidthMm = 100 });
+        output.WriteLine($"   -> estimativa {estimate:N0} pontos (real {pattern.StitchCount:N0}, {100.0 * (estimate - pattern.StitchCount) / pattern.StitchCount:+0;-0}%)");
         output.WriteLine($"   -> digitalizar {tDigitize.TotalSeconds:0.0}s, gerar pontos {tStitch.TotalSeconds:0.0}s");
         foreach (var l in result.Layers)
             output.WriteLine($"      {l.Thread.Name,-22} {l.ObjectCount,3} objetos  {l.AreaMm2,7:0} mm²");
@@ -138,3 +140,4 @@ public class RealImageTests(ITestOutputHelper output)
         Assert.Empty(editor.Design.Objects);
     }
 }
+
