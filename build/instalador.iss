@@ -43,7 +43,7 @@ Name: "ptbr"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "assocbdx"; Description: "Abrir projetos do Bordadox (.bdx) com o Bordadox"; GroupDescription: "Associação de arquivos:"
-Name: "assocbordado"; Description: "Mostrar o Bordadox em ""Abrir com"" para arquivos .pes e .dst"; GroupDescription: "Associação de arquivos:"
+Name: "assocbordado"; Description: "Mostrar o Bordadox em ""Abrir com"" para arquivos .pes, .dst, .exp, .jef e .vp3"; GroupDescription: "Associação de arquivos:"
 
 [Files]
 Source: "{#Origem}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -58,13 +58,19 @@ Root: HKA; Subkey: "Software\Classes\.bdx"; ValueType: string; ValueData: "Borda
 Root: HKA; Subkey: "Software\Classes\Bordadox.Projeto"; ValueType: string; ValueData: "Projeto de bordado Bordadox"; Flags: uninsdeletekey; Tasks: assocbdx
 Root: HKA; Subkey: "Software\Classes\Bordadox.Projeto\DefaultIcon"; ValueType: string; ValueData: "{app}\Bordadox.App.exe,0"; Tasks: assocbdx
 Root: HKA; Subkey: "Software\Classes\Bordadox.Projeto\shell\open\command"; ValueType: string; ValueData: """{app}\Bordadox.App.exe"" ""%1"""; Tasks: assocbdx
-; .pes / .dst: só aparece em "Abrir com"; não toma o lugar do programa que o usuário já usa.
+; .pes, .dst, .exp, .jef, .vp3: só aparece em "Abrir com"; não toma o lugar do programa que o usuário já usa.
 Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Bordadox"; Flags: uninsdeletekey; Tasks: assocbordado
 Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\shell\open\command"; ValueType: string; ValueData: """{app}\Bordadox.App.exe"" ""%1"""; Tasks: assocbordado
 Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\SupportedTypes"; ValueType: string; ValueName: ".pes"; ValueData: ""; Tasks: assocbordado
 Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\SupportedTypes"; ValueType: string; ValueName: ".dst"; ValueData: ""; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\SupportedTypes"; ValueType: string; ValueName: ".exp"; ValueData: ""; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\SupportedTypes"; ValueType: string; ValueName: ".jef"; ValueData: ""; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\Applications\Bordadox.App.exe\SupportedTypes"; ValueType: string; ValueName: ".vp3"; ValueData: ""; Tasks: assocbordado
 Root: HKA; Subkey: "Software\Classes\.pes\OpenWithList\Bordadox.App.exe"; ValueType: none; Flags: uninsdeletekey; Tasks: assocbordado
 Root: HKA; Subkey: "Software\Classes\.dst\OpenWithList\Bordadox.App.exe"; ValueType: none; Flags: uninsdeletekey; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\.exp\OpenWithList\Bordadox.App.exe"; ValueType: none; Flags: uninsdeletekey; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\.jef\OpenWithList\Bordadox.App.exe"; ValueType: none; Flags: uninsdeletekey; Tasks: assocbordado
+Root: HKA; Subkey: "Software\Classes\.vp3\OpenWithList\Bordadox.App.exe"; ValueType: none; Flags: uninsdeletekey; Tasks: assocbordado
 
 [Run]
 Filename: "{app}\Bordadox.App.exe"; Description: "{cm:LaunchProgram,Bordadox}"; Flags: nowait postinstall skipifsilent

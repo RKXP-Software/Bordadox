@@ -117,8 +117,11 @@ Os pacotes ficam em `dist/` e já trazem o .NET 10 embutido (Windows 10/11 de 64
 
 - `Bordadox-<versão>-setup.exe`: instalador. Instala só para o usuário atual (não pede administrador) em
   `%LOCALAPPDATA%\Programs\Bordadox`, cria atalho no Menu Iniciar (e, opcional, na Área de Trabalho), associa `.bdx`
-  ao Bordadox e o inclui em "Abrir com" para `.pes` e `.dst`. Desinstala pelo Windows, removendo as associações.
+  ao Bordadox e o inclui em "Abrir com" para `.pes`, `.dst`, `.exp`, `.jef` e `.vp3`. Desinstala pelo Windows, removendo as associações.
 - `Bordadox-<versão>-portable.zip`: versão portátil. Extraia em qualquer pasta e execute `Bordadox.App.exe`.
+
+Versão atual: **0.8.0** (`dist/Bordadox-0.8.0-setup.exe`, cerca de 44 MB, e `dist/Bordadox-0.8.0-portable.zip`, cerca de 61 MB).
+A pasta `dist/` não vai para o Git: gere os pacotes com o comando abaixo.
 
 Para gerar os dois (precisa do .NET 10 SDK e do [Inno Setup 6](https://jrsoftware.org/isdl.php)):
 
@@ -244,9 +247,10 @@ camadas → `ContourTracer` + `Vectorizer` (formas) e `Skeleton` (traços finos)
 dotnet test
 ```
 
-Cobrem leitura/gravação de PES e DST (ida e volta, cabeçalho PEC, e arquivos reais), geradores de ponto, sequenciador, editor
-(cliques simulados, nós, desfazer), texto com fontes reais, lista de fontes, redução de cores, traçado de contornos,
-vetorização, esqueleto de traços finos, detecção de fotos e digitalização de ponta a ponta com imagens reais.
+São 251 testes. Cobrem leitura/gravação dos cinco formatos (ida e volta, cabeçalhos e estrutura de bytes, arquivos reais), geradores
+de ponto, sequenciador (trocas de linha e paradas), editor (cliques simulados, nós, desfazer, aplique), texto com fontes reais (satin em
+colunas, kerning), lista de fontes, redução de cores e fusão de tons, traçado de contornos, vetorização, esqueleto de traços finos,
+detecção de fotos, digitalização de ponta a ponta com imagens reais, aplique, efeitos de preenchimento e ficha de produção.
 
 ---
 
