@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Bordadox.App/Bordadox.App.csproj" />
+    <Project Path="src/Bordadox.Core/Bordadox.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Bordadox.App.Tests/Bordadox.App.Tests.csproj" />
+    <Project Path="tests/Bordadox.Tests/Bordadox.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Bordadox.Amostras/Bordadox.Amostras.csproj" />
+  </Folder>
+</Solution>

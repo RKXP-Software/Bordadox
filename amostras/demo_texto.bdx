@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 1,
+  "HoopName": "Médio 130 × 180 mm",
+  "HoopRotated": true,
+  "Settings": { "TrimAtMm": 2, "TieStitches": true, "MinStitchMm": 0.3, "RotateOnExport": true },
+  "Objects": [
+    { "tipo": "texto", "Name": "Titulo", "Text": "Bordadox", "FontFamily": "Arial", "Bold": true, "HeightMm": 16,
+      "Alignment": "Center", "Origin": { "X": 0, "Y": -30 }, "U": { "X": 1, "Y": 0 }, "V": { "X": 0, "Y": 1 },
+      "Color": { "R": 10, "G": 85, "B": 163, "Name": "Azul", "Code": "2" } },
+    { "tipo": "texto", "Name": "Linhas", "Text": "Ponto cheio\nem varias linhas", "FontFamily": "Times New Roman", "Italic": true, "HeightMm": 7,
+      "Alignment": "Center", "FillType": "Tatami", "Origin": { "X": 0, "Y": -5 }, "U": { "X": 1, "Y": 0 }, "V": { "X": 0, "Y": 1 },
+      "Color": { "R": 237, "G": 23, "B": 31, "Name": "Vermelho", "Code": "5" } },
+    { "tipo": "texto", "Name": "Girado", "Text": "Girado 20°", "FontFamily": "Segoe UI", "HeightMm": 9,
+      "Alignment": "Left", "Origin": { "X": -50, "Y": 45 }, "U": { "X": 0.9397, "Y": -0.3420 }, "V": { "X": 0.3420, "Y": 0.9397 },
+      "Color": { "R": 112, "G": 188, "B": 31, "Name": "Verde-limão", "Code": "14" } },
+    { "tipo": "texto", "Name": "Pequeno", "Text": "Letra pequena 5 mm", "FontFamily": "Arial", "HeightMm": 5,
+      "Alignment": "Right", "Origin": { "X": 60, "Y": 40 }, "U": { "X": 1, "Y": 0 }, "V": { "X": 0, "Y": 1 },
+      "Color": { "R": 0, "G": 0, "B": 0, "Name": "Preto", "Code": "20" } }
+  ]
+}

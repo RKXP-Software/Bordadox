@@ -1,0 +1,620 @@
+{
+  "FormatVersion": 1,
+  "HoopName": "Pequeno 100 × 100 mm",
+  "HoopRotated": false,
+  "Settings": {
+    "TrimAtMm": 2,
+    "TieStitches": true,
+    "MinStitchMm": 0.3,
+    "RotateOnExport": true
+  },
+  "Objects": [
+    {
+      "tipo": "preenchimento",
+      "Outline": [
+        {
+          "P": {
+            "X": 0,
+            "Y": -40,
+            "Length": 40,
+            "LengthSquared": 1600
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 20,
+            "Y": -20,
+            "Length": 28.284271247461902,
+            "LengthSquared": 800
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 0,
+            "Y": 0,
+            "Length": 0,
+            "LengthSquared": 0
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": -20,
+            "Y": -20,
+            "Length": 28.284271247461902,
+            "LengthSquared": 800
+          },
+          "Curve": true
+        }
+      ],
+      "Holes": [
+        [
+          {
+            "P": {
+              "X": -6,
+              "Y": -26,
+              "Length": 26.68332812825267,
+              "LengthSquared": 712
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 6,
+              "Y": -26,
+              "Length": 26.68332812825267,
+              "LengthSquared": 712
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 6,
+              "Y": -14,
+              "Length": 15.231546211727817,
+              "LengthSquared": 232
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": -6,
+              "Y": -14,
+              "Length": 15.231546211727817,
+              "LengthSquared": 232
+            },
+            "Curve": false
+          }
+        ]
+      ],
+      "FillType": "Tatami",
+      "Angle": 30,
+      "Spacing": 0.4,
+      "StitchLength": 3.5,
+      "PullCompensation": 0.2,
+      "MaxSatinLength": 7,
+      "Underlay": true,
+      "UnderlaySpacing": 2.5,
+      "EdgeUnderlay": false,
+      "TypeName": "Preenchimento",
+      "ClosedPaths": true,
+      "EditablePaths": [
+        [
+          {
+            "P": {
+              "X": 0,
+              "Y": -40,
+              "Length": 40,
+              "LengthSquared": 1600
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 20,
+              "Y": -20,
+              "Length": 28.284271247461902,
+              "LengthSquared": 800
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 0,
+              "Y": 0,
+              "Length": 0,
+              "LengthSquared": 0
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": -20,
+              "Y": -20,
+              "Length": 28.284271247461902,
+              "LengthSquared": 800
+            },
+            "Curve": true
+          }
+        ],
+        [
+          {
+            "P": {
+              "X": -6,
+              "Y": -26,
+              "Length": 26.68332812825267,
+              "LengthSquared": 712
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 6,
+              "Y": -26,
+              "Length": 26.68332812825267,
+              "LengthSquared": 712
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 6,
+              "Y": -14,
+              "Length": 15.231546211727817,
+              "LengthSquared": 232
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": -6,
+              "Y": -14,
+              "Length": 15.231546211727817,
+              "LengthSquared": 232
+            },
+            "Curve": false
+          }
+        ]
+      ],
+      "Id": "aa745602-727d-408b-bdfd-21a5de954f35",
+      "Name": "Círculo com furo",
+      "Color": {
+        "R": 37,
+        "G": 132,
+        "B": 187,
+        "Name": "Azul celeste",
+        "Code": "32",
+        "Hex": "#2584BB"
+      }
+    },
+    {
+      "tipo": "preenchimento",
+      "Outline": [
+        {
+          "P": {
+            "X": 25,
+            "Y": -10,
+            "Length": 26.92582403567252,
+            "LengthSquared": 725
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 38,
+            "Y": -24,
+            "Length": 44.94441010848846,
+            "LengthSquared": 2020
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 45,
+            "Y": -40,
+            "Length": 60.207972893961475,
+            "LengthSquared": 3625
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 30,
+            "Y": -30,
+            "Length": 42.42640687119285,
+            "LengthSquared": 1800
+          },
+          "Curve": true
+        }
+      ],
+      "Holes": [],
+      "FillType": "Satin",
+      "Angle": 70,
+      "Spacing": 0.4,
+      "StitchLength": 3.5,
+      "PullCompensation": 0.2,
+      "MaxSatinLength": 7,
+      "Underlay": true,
+      "UnderlaySpacing": 2.5,
+      "EdgeUnderlay": false,
+      "TypeName": "Preenchimento",
+      "ClosedPaths": true,
+      "EditablePaths": [
+        [
+          {
+            "P": {
+              "X": 25,
+              "Y": -10,
+              "Length": 26.92582403567252,
+              "LengthSquared": 725
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 38,
+              "Y": -24,
+              "Length": 44.94441010848846,
+              "LengthSquared": 2020
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 45,
+              "Y": -40,
+              "Length": 60.207972893961475,
+              "LengthSquared": 3625
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 30,
+              "Y": -30,
+              "Length": 42.42640687119285,
+              "LengthSquared": 1800
+            },
+            "Curve": true
+          }
+        ]
+      ],
+      "Id": "a6746ee6-6f4b-4bf5-892d-f709de39b52a",
+      "Name": "Folha",
+      "Color": {
+        "R": 102,
+        "G": 186,
+        "B": 73,
+        "Name": "Verde folha",
+        "Code": "37",
+        "Hex": "#66BA49"
+      }
+    },
+    {
+      "tipo": "satin",
+      "Nodes": [
+        {
+          "P": {
+            "X": -40,
+            "Y": 10,
+            "Length": 41.23105625617661,
+            "LengthSquared": 1700
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": -40,
+            "Y": 15,
+            "Length": 42.720018726587654,
+            "LengthSquared": 1825
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": -20,
+            "Y": 5,
+            "Length": 20.615528128088304,
+            "LengthSquared": 425
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": -20,
+            "Y": 11,
+            "Length": 22.825424421026653,
+            "LengthSquared": 521
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 0,
+            "Y": 20,
+            "Length": 20,
+            "LengthSquared": 400
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 0,
+            "Y": 26,
+            "Length": 26,
+            "LengthSquared": 676
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 20,
+            "Y": 10,
+            "Length": 22.360679774997898,
+            "LengthSquared": 500
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 20,
+            "Y": 16,
+            "Length": 25.612496949731394,
+            "LengthSquared": 656
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": 40,
+            "Y": 20,
+            "Length": 44.721359549995796,
+            "LengthSquared": 2000
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 40,
+            "Y": 25,
+            "Length": 47.16990566028302,
+            "LengthSquared": 2225
+          },
+          "Curve": false
+        }
+      ],
+      "Spacing": 0.4,
+      "PullCompensation": 0.15,
+      "AutoSplit": true,
+      "MaxStitch": 7,
+      "CenterUnderlay": true,
+      "EdgeUnderlay": false,
+      "ZigzagUnderlay": false,
+      "ZigzagSpacing": 2,
+      "TypeName": "Coluna satin",
+      "EditablePaths": [
+        [
+          {
+            "P": {
+              "X": -40,
+              "Y": 10,
+              "Length": 41.23105625617661,
+              "LengthSquared": 1700
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": -40,
+              "Y": 15,
+              "Length": 42.720018726587654,
+              "LengthSquared": 1825
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": -20,
+              "Y": 5,
+              "Length": 20.615528128088304,
+              "LengthSquared": 425
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": -20,
+              "Y": 11,
+              "Length": 22.825424421026653,
+              "LengthSquared": 521
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 0,
+              "Y": 20,
+              "Length": 20,
+              "LengthSquared": 400
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 0,
+              "Y": 26,
+              "Length": 26,
+              "LengthSquared": 676
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 20,
+              "Y": 10,
+              "Length": 22.360679774997898,
+              "LengthSquared": 500
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 20,
+              "Y": 16,
+              "Length": 25.612496949731394,
+              "LengthSquared": 656
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": 40,
+              "Y": 20,
+              "Length": 44.721359549995796,
+              "LengthSquared": 2000
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 40,
+              "Y": 25,
+              "Length": 47.16990566028302,
+              "LengthSquared": 2225
+            },
+            "Curve": false
+          }
+        ]
+      ],
+      "ClosedPaths": true,
+      "Id": "3657af3c-98ba-4f94-a09e-fcee47ae0712",
+      "Name": "Coluna S",
+      "Color": {
+        "R": 237,
+        "G": 23,
+        "B": 31,
+        "Name": "Vermelho",
+        "Code": "5",
+        "Hex": "#ED171F"
+      }
+    },
+    {
+      "tipo": "corrido",
+      "Nodes": [
+        {
+          "P": {
+            "X": -45,
+            "Y": -45,
+            "Length": 63.63961030678928,
+            "LengthSquared": 4050
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 45,
+            "Y": -45,
+            "Length": 63.63961030678928,
+            "LengthSquared": 4050
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 45,
+            "Y": 40,
+            "Length": 60.207972893961475,
+            "LengthSquared": 3625
+          },
+          "Curve": false
+        },
+        {
+          "P": {
+            "X": 0,
+            "Y": 46,
+            "Length": 46,
+            "LengthSquared": 2116
+          },
+          "Curve": true
+        },
+        {
+          "P": {
+            "X": -45,
+            "Y": 40,
+            "Length": 60.207972893961475,
+            "LengthSquared": 3625
+          },
+          "Curve": false
+        }
+      ],
+      "StitchLength": 2.5,
+      "Triple": true,
+      "Closed": true,
+      "TypeName": "Ponto corrido",
+      "ClosedPaths": true,
+      "EditablePaths": [
+        [
+          {
+            "P": {
+              "X": -45,
+              "Y": -45,
+              "Length": 63.63961030678928,
+              "LengthSquared": 4050
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 45,
+              "Y": -45,
+              "Length": 63.63961030678928,
+              "LengthSquared": 4050
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 45,
+              "Y": 40,
+              "Length": 60.207972893961475,
+              "LengthSquared": 3625
+            },
+            "Curve": false
+          },
+          {
+            "P": {
+              "X": 0,
+              "Y": 46,
+              "Length": 46,
+              "LengthSquared": 2116
+            },
+            "Curve": true
+          },
+          {
+            "P": {
+              "X": -45,
+              "Y": 40,
+              "Length": 60.207972893961475,
+              "LengthSquared": 3625
+            },
+            "Curve": false
+          }
+        ]
+      ],
+      "Id": "45d41e7d-17ed-44d6-aa7c-416f4b6851e6",
+      "Name": "Moldura",
+      "Color": {
+        "R": 0,
+        "G": 0,
+        "B": 0,
+        "Name": "Preto",
+        "Code": "20",
+        "Hex": "#000000"
+      }
+    }
+  ],
+  "Background": null
+}

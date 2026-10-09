@@ -1,0 +1,18 @@
+bin/
+obj/
+.vs/
+*.user
+TestResults/
+.verify/
+
+# Exemplos de terceiros colocados em amostras/ (logos, desenhos de bordado de outras pessoas) não vão para o repositório.
+# Só ficam os exemplos gerados pela ferramenta tools/Bordadox.Amostras.
+amostras/*
+!amostras/teste_nq1400e.pes
+!amostras/teste_nq1400e.dst
+!amostras/contorno_150x250.pes
+!amostras/contorno_150x250.dst
+!amostras/demo_editor.bdx
+!amostras/demo_editor.pes
+!amostras/demo_editor.dst
+!amostras/demo_texto.bdx
