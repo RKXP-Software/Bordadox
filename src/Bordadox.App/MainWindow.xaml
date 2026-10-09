@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:Bordadox.App.Controls"
         xmlns:local="clr-namespace:Bordadox.App"
-        Title="Bordadox" Height="860" Width="1400" MinWidth="900" MinHeight="560"
+        Title="Bordadox" Icon="Assets/bordadox.ico" Height="860" Width="1400" MinWidth="900" MinHeight="560"
         WindowStartupLocation="CenterScreen" AllowDrop="True"
         Drop="Window_Drop" DragOver="Window_DragOver" Loaded="Window_Loaded" Closing="Window_Closing">
 

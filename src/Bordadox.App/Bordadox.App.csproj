@@ -14,6 +14,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets/bordadox.ico</ApplicationIcon>
+    <AssemblyTitle>Bordadox</AssemblyTitle>
+    <Description>Digitalizador de bordados para Brother NQ1400E</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets/bordadox.ico" />
+  </ItemGroup>
 
 </Project>

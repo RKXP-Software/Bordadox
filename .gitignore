@@ -16,3 +16,4 @@ amostras/*
 !amostras/demo_editor.pes
 !amostras/demo_editor.dst
 !amostras/demo_texto.bdx
+dist/

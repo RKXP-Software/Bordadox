@@ -97,6 +97,24 @@ dotnet run --project tools/Bordadox.Amostras -- amostras
 dotnet test
 ```
 
+### Instalar sem o SDK (instalador e versão portátil)
+
+Os pacotes ficam em `dist/` e já trazem o .NET 10 embutido (Windows 10/11 de 64 bits, nada a instalar antes):
+
+- `Bordadox-<versão>-setup.exe`: instalador. Instala só para o usuário atual (não pede administrador) em
+  `%LOCALAPPDATA%\Programs\Bordadox`, cria atalho no Menu Iniciar (e, opcional, na Área de Trabalho), associa `.bdx`
+  ao Bordadox e o inclui em "Abrir com" para `.pes` e `.dst`. Desinstala pelo Windows, removendo as associações.
+- `Bordadox-<versão>-portable.zip`: versão portátil. Extraia em qualquer pasta e execute `Bordadox.App.exe`.
+
+Para gerar os dois (precisa do .NET 10 SDK e do [Inno Setup 6](https://jrsoftware.org/isdl.php)):
+
+```bash
+powershell -ExecutionPolicy Bypass -File build/publicar.ps1
+```
+
+Opções: `-SemTestes` (pula a suíte), `-SemInstalador` (só o portátil). A versão fica em `Directory.Build.props`.
+O ícone atual é provisório (`build/gerar-icone.ps1`); a identidade visual final vem depois.
+
 ---
 
 ## 3. Como usar, com exemplos
@@ -182,6 +200,7 @@ tests/Bordadox.Tests     Testes do núcleo (formatos, geradores, digitalização
 tests/Bordadox.App.Tests Testes do editor e da interface (fontes reais, imagens reais)
 tools/Bordadox.Amostras  Gera os arquivos de exemplo da pasta amostras/
 amostras/                Exemplos gerados (PES, DST, .bdx)
+build/                   Scripts de empacotamento: publicar.ps1, instalador.iss (Inno Setup), gerar-icone.ps1
 PLANO.md                 Plano por fases e andamento
 ```
 
@@ -246,4 +265,4 @@ Resumo (detalhes e ordem em [PLANO.md](PLANO.md)):
 
 **Acabamento do produto**
 - **Identidade visual:** logo do Bordadox (por exemplo, um "X" sendo bordado), ícone do aplicativo e da janela, tela de abertura.
-- Instalador / pacote para distribuir sem precisar do SDK.
+- ~~Instalador e versão portátil~~ (feitos: `build/publicar.ps1`). Falta assinar o instalador (o Windows pode avisar "editor desconhecido") e trocar o ícone provisório pela identidade final.

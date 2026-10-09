@@ -69,6 +69,7 @@ A janela de digitalização tem zoom na prévia (roda do mouse, arrastar, botõe
 
 ### Pedidos do usuário ainda na fila
 - **Identidade visual (no final do projeto):** logo do Bordadox, por exemplo um "X" sendo bordado; ícone do app (.ico) e da janela, e tela de abertura.
+- ✅ **Instalador e versão portátil:** `build/publicar.ps1` gera `dist/Bordadox-<versão>-setup.exe` (Inno Setup, por usuário, sem administrador, associa .bdx e "Abrir com" .pes/.dst) e `dist/Bordadox-<versão>-portable.zip`, ambos autocontidos (.NET 10 embutido). Ícone provisório; falta assinatura de código.
 - ✅ **Digitalizar imagem só como fundo** (sem gerar bordado), para desenhar por cima: caixa "Só usar como fundo" na janela de digitalização; o menu "Imagem de fundo" também aceita SVG.
 - ✅ **Régua em mm** (Exibir › Régua): zero no centro do bastidor, marcador do cursor; a escolha é lembrada.
 - ✅ **Satin x tatami mais distintos:** o satin tem ângulo automático (pontos cruzam a largura) e o tatami tem penetrações escalonadas também em formas estreitas.
