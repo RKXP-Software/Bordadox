@@ -17,4 +17,5 @@ public static class AppCommands
     public static readonly RoutedUICommand Duplicate = new("Duplicar", nameof(Duplicate), typeof(AppCommands));
     public static readonly RoutedUICommand Delete = new("Excluir", nameof(Delete), typeof(AppCommands));
     public static readonly RoutedUICommand Digitize = new("Digitalizar imagem", nameof(Digitize), typeof(AppCommands));
+    public static readonly RoutedUICommand ShowShortcuts = new("Atalhos do teclado", nameof(ShowShortcuts), typeof(AppCommands));
 }

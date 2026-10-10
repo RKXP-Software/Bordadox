@@ -15,7 +15,10 @@ public sealed class StitchCache
     /// <summary>Passos (cor, pontos, parada) do objeto; refaz só se o objeto ou o ponto de entrada mudou.</summary>
     public List<StitchStep> GetSteps(EmbObject obj, Vec2? from)
     {
-        var key = JsonSerializer.Serialize(obj, DesignJson.Options) +
+        // Pontos importados não passam por parâmetros que valham a pena guardar: gerar de novo é mais barato
+        // do que serializar milhares de pontos só para montar a chave.
+        if (obj is StitchBlockObject) return obj.GenerateSteps(from);
+        var key = JsonSerializer.Serialize(obj, DesignJson.Compact) +
                   (from is { } f ? $"|{f.X:0.0},{f.Y:0.0}" : "|-");
         if (_items.TryGetValue(obj.Id, out var hit) && hit.Key == key) return hit.Steps;
         var steps = obj.GenerateSteps(from);

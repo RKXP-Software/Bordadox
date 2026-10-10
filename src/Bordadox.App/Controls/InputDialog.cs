@@ -8,6 +8,9 @@ namespace Bordadox.App.Controls;
 /// <summary>Caixa simples para pedir um número ao usuário.</summary>
 public static class InputDialog
 {
+    /// <summary>Só para testes: responde no lugar da caixa numérica (recebe o título) e evita abrir uma janela modal.</summary>
+    public static Func<string, double?>? AutoAnswer { get; set; }
+
     public static string? AskText(Window owner, string title, string prompt, string initial)
     {
         var box = new TextBox { Text = initial, Margin = new Thickness(0, 6, 0, 10), Padding = new Thickness(3), FontSize = 14 };
@@ -39,6 +42,7 @@ public static class InputDialog
 
     public static double? AskNumber(Window owner, string title, string prompt, double initial)
     {
+        if (AutoAnswer is { } answer) return answer(title);
         var box = new TextBox { Text = initial.ToString("0.##", CultureInfo.CurrentCulture), Margin = new Thickness(0, 6, 0, 10), Padding = new Thickness(3) };
         var ok = new Button { Content = "OK", Width = 80, IsDefault = true, Margin = new Thickness(0, 0, 6, 0) };
         var cancel = new Button { Content = "Cancelar", Width = 80, IsCancel = true };

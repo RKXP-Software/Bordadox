@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
@@ -18,6 +19,8 @@ public enum EditorTool { Select, Run, Satin, Fill, Hole, Text, Applique }
 public sealed class EditorController
 {
     private const int MaxUndo = 200;
+    // Limite de memória do histórico (caracteres do JSON). Um desenho com muitos pontos importados gera snapshots grandes.
+    private const long MaxUndoChars = 60_000_000;
     private const double HandlePx = 7;
     private const double HitPx = 6;
 
@@ -31,7 +34,12 @@ public sealed class EditorController
     private DragKind _drag;
     private Vec2 _dragStart, _dragLast;
     private (int Path, int Index) _dragNode;
-    private string? _pendingSnapshot;
+    // Snapshot do desfazer só é tirado quando o arraste passa do limiar (um clique sem mover não gera passo).
+    private bool _needsSnapshot;
+    // Durante um arraste o desenho é recalculado no máximo a cada DragRebuildMs; o restante é feito ao soltar o mouse.
+    private const double DragRebuildMs = 50;
+    private readonly Stopwatch _sinceRebuild = Stopwatch.StartNew();
+    private bool _rebuildPending;
 
     public EmbDesign Design { get; private set; } = new();
     public StitchPattern Pattern { get; private set; } = new();
@@ -159,7 +167,19 @@ public sealed class EditorController
         Settings = Design.Settings,
         Objects = Design.Objects,
         Selected = Selection.Select(o => o.Id).ToList(),
-    }, DesignJson.Options);
+    }, DesignJson.Compact);
+
+    /// <summary>Guarda um snapshot no histórico, descartando os mais antigos se passar do limite de passos ou de memória.</summary>
+    private static void Push(List<string> history, string snapshot)
+    {
+        history.Add(snapshot);
+        long total = history.Sum(s => (long)s.Length);
+        while (history.Count > MaxUndo || (total > MaxUndoChars && history.Count > 1))
+        {
+            total -= history[0].Length;
+            history.RemoveAt(0);
+        }
+    }
 
     private void RestoreSnapshot(string json)
     {
@@ -177,8 +197,7 @@ public sealed class EditorController
 
     public void Checkpoint()
     {
-        _undo.Add(TakeSnapshot());
-        if (_undo.Count > MaxUndo) _undo.RemoveAt(0);
+        Push(_undo, TakeSnapshot());
         _redo.Clear();
     }
 
@@ -186,7 +205,7 @@ public sealed class EditorController
     {
         if (Drawing.Count > 0) { Drawing.Clear(); OverlayChanged?.Invoke(); return; }
         if (_undo.Count == 0) return;
-        _redo.Add(TakeSnapshot());
+        Push(_redo, TakeSnapshot());
         var s = _undo[^1];
         _undo.RemoveAt(_undo.Count - 1);
         RestoreSnapshot(s);
@@ -195,7 +214,7 @@ public sealed class EditorController
     public void Redo()
     {
         if (_redo.Count == 0) return;
-        _undo.Add(TakeSnapshot());
+        Push(_undo, TakeSnapshot());
         var s = _redo[^1];
         _redo.RemoveAt(_redo.Count - 1);
         RestoreSnapshot(s);
@@ -319,12 +338,13 @@ public sealed class EditorController
     }
 
     /// <summary>
-    /// Converte os preenchimentos selecionados em aplique (ou os apliques em preenchimento), mantendo o contorno, os furos,
-    /// o nome, a cor e a posição na ordem de costura. Devolve quantos objetos foram convertidos.
+    /// Converte a seleção em aplique (ou em preenchimento), mantendo o contorno, os furos, o nome, a cor e a posição na
+    /// ordem de costura. Preenchimentos e apliques convertem entre si; um ponto corrido só converte se tiver
+    /// "Caminho fechado" marcado, e então o caminho vira o contorno da área. Devolve quantos objetos foram convertidos.
     /// </summary>
     public int ConvertShapes(bool toApplique)
     {
-        var targets = Selection.Where(o => toApplique ? o is FillObject : o is AppliqueObject).Cast<ShapeObject>().ToList();
+        var targets = Selection.Where(o => CanConvert(o, toApplique)).ToList();
         if (targets.Count == 0) return 0;
         var created = new List<EmbObject>();
         Change(() =>
@@ -332,8 +352,16 @@ public sealed class EditorController
             foreach (var old in targets)
             {
                 ShapeObject neu = toApplique ? new AppliqueObject() : new FillObject();
-                neu.Outline = old.Outline.ToList();
-                neu.Holes = old.Holes.Select(h => h.ToList()).ToList();
+                if (old is RunObject run)
+                {
+                    neu.Outline = run.Nodes.ToList();
+                }
+                else
+                {
+                    var shape = (ShapeObject)old;
+                    neu.Outline = shape.Outline.ToList();
+                    neu.Holes = shape.Holes.Select(h => h.ToList()).ToList();
+                }
                 neu.Color = old.Color;
                 neu.Name = old.Name;
                 int i = Design.Objects.IndexOf(old);
@@ -344,6 +372,11 @@ public sealed class EditorController
         Select(created);
         return created.Count;
     }
+
+    /// <summary>Pode virar aplique (ou preenchimento) com a conversão pedida?</summary>
+    public static bool CanConvert(EmbObject o, bool toApplique) => toApplique
+        ? o is FillObject || o is RunObject { Closed: true }
+        : o is AppliqueObject || o is RunObject { Closed: true };
 
     /// <summary>
     /// Explode os objetos selecionados em partes independentes (ver <see cref="Exploder"/>), no mesmo lugar da ordem de costura.
@@ -441,11 +474,12 @@ public sealed class EditorController
         }
         if (!leftDown || _drag == DragKind.None) return;
 
-        if (_pendingSnapshot != null && Vec2.Distance(p, _dragStart) > 0.05 && _drag != DragKind.Rubber)
+        // O snapshot é tirado antes da primeira alteração, quando o arraste passa do limiar (o estado ainda é o original).
+        if (_needsSnapshot && Vec2.Distance(p, _dragStart) > 0.05)
         {
-            _undo.Add(_pendingSnapshot);
+            Push(_undo, TakeSnapshot());
             _redo.Clear();
-            _pendingSnapshot = null;
+            _needsSnapshot = false;
             IsDirty = true;
         }
 
@@ -454,13 +488,13 @@ public sealed class EditorController
             case DragKind.Move:
                 var d = p - _dragLast;
                 foreach (var o in Selection) o.Transform(q => q + d);
-                Rebuild();
+                RebuildDuringDrag();
                 break;
             case DragKind.Node:
                 var obj = Selection[0];
                 var old = obj.EditablePaths[_dragNode.Path][_dragNode.Index];
                 obj.SetNode(_dragNode.Path, _dragNode.Index, old with { P = p });
-                Rebuild();
+                RebuildDuringDrag();
                 break;
         }
         _dragLast = p;
@@ -478,9 +512,11 @@ public sealed class EditorController
                 Select(mods.HasFlag(ModifierKeys.Control) ? Selection.Concat(hits).ToList() : hits.ToList());
             }
         }
+        if (_rebuildPending) Rebuild();   // o último estado do arraste ainda não foi recalculado
+        _rebuildPending = false;
         if (_drag is DragKind.Move or DragKind.Node) SelectionChanged?.Invoke();
         _drag = DragKind.None;
-        _pendingSnapshot = null;
+        _needsSnapshot = false;
         OverlayChanged?.Invoke();
     }
 
@@ -549,7 +585,20 @@ public sealed class EditorController
     {
         _drag = kind;
         _dragStart = _dragLast = p;
-        _pendingSnapshot = kind == DragKind.Rubber ? null : TakeSnapshot();
+        _needsSnapshot = kind != DragKind.Rubber;
+    }
+
+    /// <summary>Recalcula o desenho no meio de um arraste, sem passar de uma vez por cada movimento do mouse.</summary>
+    private void RebuildDuringDrag()
+    {
+        if (_sinceRebuild.Elapsed.TotalMilliseconds < DragRebuildMs)
+        {
+            _rebuildPending = true;
+            return;
+        }
+        Rebuild();
+        _sinceRebuild.Restart();
+        _rebuildPending = false;
     }
 
     public EmbObject? HitTest(Vec2 p, double tol)

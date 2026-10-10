@@ -26,6 +26,7 @@
         <CommandBinding Command="local:AppCommands.ZoomOut" Executed="ZoomOut_Executed" />
         <CommandBinding Command="local:AppCommands.ZoomActual" Executed="ZoomActual_Executed" />
         <CommandBinding Command="local:AppCommands.PlayPause" Executed="PlayPause_Executed" />
+        <CommandBinding Command="local:AppCommands.ShowShortcuts" Executed="ShowShortcuts_Executed" />
     </Window.CommandBindings>
 
     <Window.InputBindings>
@@ -34,6 +35,7 @@
         <KeyBinding Command="local:AppCommands.Digitize" Modifiers="Ctrl" Key="I" />
         <KeyBinding Command="local:AppCommands.Duplicate" Modifiers="Ctrl" Key="D" />
         <KeyBinding Command="ApplicationCommands.Redo" Modifiers="Ctrl+Shift" Key="Z" />
+        <KeyBinding Command="local:AppCommands.ShowShortcuts" Key="F1" />
     </Window.InputBindings>
 
     <Window.Resources>
@@ -43,12 +45,69 @@
             <Setter Property="MinWidth" Value="30" />
         </Style>
         <Style TargetType="RadioButton" x:Key="ToolRadio" BasedOn="{StaticResource {x:Type ToggleButton}}">
-            <Setter Property="Height" Value="54" />
+            <Setter Property="Height" Value="44" />
             <Setter Property="Margin" Value="4,2" />
             <Setter Property="GroupName" Value="Tools" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="Focusable" Value="False" />
+            <!-- Tempo para ler a explicação da ferramenta antes de ela sumir -->
+            <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+            <Setter Property="ToolTipService.ShowDuration" Value="30000" />
         </Style>
+        <Style TargetType="ToolTip" x:Key="ToolHelp">
+            <Setter Property="MaxWidth" Value="330" />
+            <Setter Property="Padding" Value="9,7" />
+        </Style>
+        <!-- Explicação de cada ferramenta: o que ela faz, como usar e o atalho. Aparece ao passar o mouse. -->
+        <ToolTip x:Key="TipSelecionar" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Selecionar e mover (V)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Use para escolher, mover e ajustar os objetos. Clique num objeto para selecioná-lo; arraste para movê-lo; arraste sobre uma área vazia para selecionar vários. Ctrl ou Shift + clique soma objetos à seleção. Com um objeto selecionado, Ctrl + clique no contorno cria um ponto e duplo-clique num ponto apaga." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipCorrido" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Ponto corrido (R)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Desenha uma linha de pontos simples, como um contorno fino ou um detalhe. Clique em cada ponto da linha; clique direito para uma curva. Enter ou duplo-clique termina; Esc cancela." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipSatin" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Coluna satin (C)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Desenha uma faixa estreita e brilhante de pontos, ideal para letras e bordas. Clique alternando os dois lados da coluna (A, B, A, B...); clique direito para uma curva. Enter termina; Esc cancela." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipPreencher" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Preenchimento (F)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Preenche uma área inteira com pontos (tatami ou satin), como um logo chapado. Clique no contorno da área, com cantos e curvas; Enter termina. Depois, em Propriedades, escolha o tipo de ponto, o ângulo e os efeitos (degradê, contorno, padrões)." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipAplique" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Aplique (A)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Cria um aplique: um pedaço de tecido costurado sobre a peça. Desenhe o contorno do tecido. A máquina para em três passos: linha de posicionamento, fixação do tecido e acabamento em satin. Enter termina; Esc cancela." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipFuro" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Furo (H)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Abre um furo num preenchimento, deixando o miolo sem pontos, como o centro da letra O. Selecione primeiro o preenchimento ou o aplique, depois desenhe o contorno do furo. Enter termina; Esc cancela." />
+            </StackPanel>
+        </ToolTip>
+        <ToolTip x:Key="TipTexto" Style="{StaticResource ToolHelp}">
+            <StackPanel>
+                <TextBlock Text="Texto (T)" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Margin="0,3,0,0"
+                           Text="Escreve um texto com as fontes instaladas no Windows. Clique onde a linha de base do texto deve começar, digite na janela e ajuste fonte, altura e espaçamento em Propriedades. Para editar um texto depois, use Selecionar e dê duplo-clique nele." />
+            </StackPanel>
+        </ToolTip>
         <Style TargetType="TextBlock" x:Key="PanelHeader">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="8,8,8,4" />
@@ -123,6 +182,9 @@
                 <MenuItem Header="_Ir para o início" Click="SimStart_Click" InputGestureText="Home" />
                 <MenuItem Header="Ir para o _fim" Click="SimEnd_Click" InputGestureText="End" />
             </MenuItem>
+            <MenuItem Header="_Ajuda">
+                <MenuItem Header="_Atalhos do teclado..." Command="local:AppCommands.ShowShortcuts" InputGestureText="F1" />
+            </MenuItem>
         </Menu>
 
         <ToolBarTray DockPanel.Dock="Top">
@@ -195,26 +257,26 @@
         <!-- Ferramentas -->
         <Border DockPanel.Dock="Left" Width="43" Background="#F3F3F3" BorderBrush="#DDD" BorderThickness="0,0,1,0">
             <StackPanel Margin="0,6">
-                <RadioButton x:Name="ToolSelect" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Select" IsChecked="True" ToolTip="Selecionar, mover e editar nós (V)">
-                    <StackPanel><TextBlock Text="↖" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolSelect" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Select" IsChecked="True" ToolTip="{StaticResource TipSelecionar}">
+                    <StackPanel><TextBlock Text="↖" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolRun" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Run" ToolTip="Ponto corrido (R)">
-                    <StackPanel><TextBlock Text="〰" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolRun" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Run" ToolTip="{StaticResource TipCorrido}">
+                    <StackPanel><TextBlock Text="〰" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolSatin" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Satin" ToolTip="Coluna satin: clique alternando os dois lados (C)">
-                    <StackPanel><TextBlock Text="▥" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolSatin" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Satin" ToolTip="{StaticResource TipSatin}">
+                    <StackPanel><TextBlock Text="▥" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolFill" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Fill" ToolTip="Preenchimento tatami/satin (F)">
-                    <StackPanel><TextBlock Text="▦" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolFill" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Fill" ToolTip="{StaticResource TipPreencher}">
+                    <StackPanel><TextBlock Text="▦" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolApplique" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Applique" ToolTip="Aplique: guia, fixação do tecido e acabamento em satin, com paradas (A)">
-                    <StackPanel><TextBlock Text="◧" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolApplique" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Applique" ToolTip="{StaticResource TipAplique}">
+                    <StackPanel><TextBlock Text="◧" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolHole" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Hole" ToolTip="Furo no preenchimento selecionado (H)">
-                    <StackPanel><TextBlock Text="◌" FontSize="15" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolHole" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Hole" ToolTip="{StaticResource TipFuro}">
+                    <StackPanel><TextBlock Text="◌" FontSize="12" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
-                <RadioButton x:Name="ToolText" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Text" ToolTip="Texto com fontes do Windows (T)">
-                    <StackPanel><TextBlock Text="A" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" /></StackPanel>
+                <RadioButton x:Name="ToolText" Style="{StaticResource ToolRadio}" Click="Tool_Click" Tag="Text" ToolTip="{StaticResource TipTexto}">
+                    <StackPanel><TextBlock Text="A" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" /></StackPanel>
                 </RadioButton>
                 <Separator Margin="6,8" />
                 <TextBlock Text="Cor atual" FontSize="7.5" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#555" />

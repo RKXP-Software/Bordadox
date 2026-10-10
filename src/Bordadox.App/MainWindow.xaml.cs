@@ -544,7 +544,9 @@ public partial class MainWindow : Window
     private void ConvertShapes(bool toApplique)
     {
         int n = _editor.ConvertShapes(toApplique);
-        if (n == 0) ShowMessage(toApplique ? "Selecione um preenchimento para converter em aplique." : "Selecione um aplique para converter em preenchimento.");
+        if (n == 0) ShowMessage(toApplique
+            ? "Selecione um preenchimento, ou um ponto corrido com \"Caminho fechado\" marcado, para converter em aplique."
+            : "Selecione um aplique, ou um ponto corrido com \"Caminho fechado\" marcado, para converter em preenchimento.");
         else OnSelectionChanged();
     }
 
@@ -670,6 +672,8 @@ public partial class MainWindow : Window
     }
 
     // ---------- Simulação ----------
+
+    private void ShowShortcuts_Executed(object sender, ExecutedRoutedEventArgs e) => ShortcutsDialog.Show(this);
 
     private void PlayPause_Executed(object sender, ExecutedRoutedEventArgs e)
     {

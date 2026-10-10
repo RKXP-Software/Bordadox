@@ -158,4 +158,15 @@ public static class DesignJson
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         Converters = { new JsonStringEnumConverter() },
     };
+
+    /// <summary>
+    /// Mesmo formato, sem identação. Usado em chaves de cache e em snapshots do desfazer, que nunca são lidos por humanos:
+    /// é menor e mais rápido de gerar.
+    /// </summary>
+    public static readonly JsonSerializerOptions Compact = new()
+    {
+        WriteIndented = false,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        Converters = { new JsonStringEnumConverter() },
+    };
 }
