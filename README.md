@@ -68,7 +68,13 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
   centralizar, duplicar, copiar/colar, **desfazer/refazer**, reordenar a sequência de costura e trocar a cor pela paleta Brother.
 - **Explodir** (Objeto › Explodir): separa o objeto selecionado em partes independentes. Texto vira uma letra por objeto (cada uma continua sendo texto editável), pontos importados de DST/PES viram um objeto por trecho contínuo, aplique e degradê viram um objeto de pontos por passo (com as paradas). Um Ctrl+Z desfaz.
 - **Parar a máquina antes de um objeto** (Propriedades › Sequência): força uma parada, mesmo com a mesma cor.
-- Barra de ferramentas da esquerda compacta (só os ícones; o nome e o atalho aparecem ao passar o mouse).
+- Barra de ferramentas da esquerda compacta (ícones pequenos). Ao passar o mouse, um tooltip explica o que cada ferramenta faz, como usar e qual é o atalho.
+- **Ajuda › Atalhos do teclado** (F1): janela com todos os atalhos do programa, agrupados por área (arquivo, editar, objeto, exibir, ferramentas, desenho e seleção).
+- **Objeto** (menu): girar 90° horário e anti-horário, girar por ângulo, espelhar horizontal e vertical, redimensionar por porcentagem,
+  centralizar no bastidor, converter em aplique ou em preenchimento, explodir e costurar antes ou depois.
+- **Arraste fluido em desenhos grandes:** durante o movimento o desenho é recalculado no máximo a cada 50 ms, e o resultado completo
+  aparece ao soltar o mouse. Um clique sem mover não cria passo no desfazer. O histórico tem limite de 200 passos e de memória
+  (cerca de 60 milhões de caracteres de projeto guardados).
 - **Painel de propriedades** de cada objeto: ângulo, densidade, comprimento do ponto, compensação de puxada, reforço por baixo etc. Os campos em
   milímetros aceitam de **0 a 100** (quem decide o valor é o usuário; valores muito pequenos usam internamente o menor valor que ainda
   funciona, para nada travar). Todo objeto, inclusive os **pontos importados de DST/PES**, tem também **Largura, Altura, Centro X/Y** (com
@@ -79,6 +85,7 @@ Abre, simula, desenha e edita bordados, escreve textos com as fontes do Windows,
 - Imagem de fundo (PNG, JPG, BMP, SVG) com posição, largura e opacidade, para desenhar por cima.
 
 ### Aplique e efeitos de preenchimento
+- **Ponto corrido fechado** (com "Caminho fechado" marcado em Propriedades) também converte em aplique ou em preenchimento: o caminho vira o contorno da área.
 - **Aplique** (ferramenta **Aplique**, atalho **A**, ou **Objeto › Converter em aplique** num preenchimento): três passos com parada da
   máquina entre eles. 1) **linha de posicionamento** (mostra onde colocar o tecido); 2) **fixação** em zigue-zague ou ponto corrido;
   3) **acabamento em satin** com largura e densidade ajustáveis, cantos em leque e furos. Guia e fixação usam uma "cor da guia".
@@ -142,7 +149,7 @@ Os pacotes ficam em `dist/` e já trazem o .NET 10 embutido (Windows 10/11 de 64
   **Atualiza por cima**: instalar uma versão nova sobre uma antiga troca os arquivos na mesma pasta, mantém as opções e as associações, fecha o programa se estiver aberto, remove bibliotecas que sobraram de versões anteriores e não mexe nos projetos nem nas preferências. Se a versão instalada for mais nova que o instalador, ele pergunta antes de voltar atrás (e recusa no modo silencioso).
 - `Bordadox-<versão>-portable.zip`: versão portátil. Extraia em qualquer pasta e execute `Bordadox.App.exe`.
 
-Versão atual: **0.8.2** (`dist/Bordadox-0.8.2-setup.exe`, cerca de 44 MB, e `dist/Bordadox-0.8.2-portable.zip`, cerca de 61 MB).
+Versão atual: **0.8.3** (`dist/Bordadox-0.8.3-setup.exe` e `dist/Bordadox-0.8.3-portable.zip`; os tamanhos aparecem depois de gerar os pacotes).
 A pasta `dist/` não vai para o Git: gere os pacotes com o comando abaixo.
 
 Para gerar os dois (precisa do .NET 10 SDK e do [Inno Setup 6](https://jrsoftware.org/isdl.php)):
@@ -226,7 +233,7 @@ Selecione um preenchimento e, em Propriedades › Efeito, escolha **Degradê (du
 | Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S | Novo / Abrir / Salvar projeto / Salvar como |
 | Ctrl+E | Exportar para a máquina (PES, DST, EXP, JEF, VP3) |
 | Ctrl+I | Digitalizar imagem |
-| Ctrl+Z / Ctrl+Y | Desfazer / Refazer |
+| Ctrl+Z / Ctrl+Y ou Ctrl+Shift+Z | Desfazer / Refazer |
 | Ctrl+C / Ctrl+V / Ctrl+D / Del | Copiar / Colar / Duplicar / Excluir |
 | V, R, C, F, A, H, T | Ferramentas: Selecionar, Corrido, Satin (coluna), Preencher, Aplique, Furo, Texto |
 | B | Bastidor deitado |
@@ -237,6 +244,11 @@ Selecione um preenchimento e, em Propriedades › Efeito, escolha **Degradê (du
 | Roda do mouse · botão do meio ou Espaço+arrastar | Zoom · mover a vista |
 | 0 / 1 / + / − | Ajustar à tela / tamanho real / zoom |
 | P, Home, End | Simulação: reproduzir/pausar, início, fim |
+| ↑ / ↓ em campos numéricos | Ajusta o valor em passos |
+| Ctrl+Enter (janela de texto) | Confirma o texto |
+| F1 | Abre a lista completa de atalhos (Ajuda › Atalhos do teclado) |
+
+A lista dentro do programa é a mesma usada pelo teste de consistência, então ela acompanha os menus.
 
 ---
 
@@ -269,10 +281,12 @@ camadas → `ContourTracer` + `Vectorizer` (formas) e `Skeleton` (traços finos)
 dotnet test
 ```
 
-São 251 testes. Cobrem leitura/gravação dos cinco formatos (ida e volta, cabeçalhos e estrutura de bytes, arquivos reais), geradores
+São 424 testes. Cobrem leitura/gravação dos cinco formatos (ida e volta, cabeçalhos e estrutura de bytes, arquivos reais), geradores
 de ponto, sequenciador (trocas de linha e paradas), editor (cliques simulados, nós, desfazer, aplique), texto com fontes reais (satin em
 colunas, kerning), lista de fontes, redução de cores e fusão de tons, traçado de contornos, vetorização, esqueleto de traços finos,
 detecção de fotos, digitalização de ponta a ponta com imagens reais, aplique, efeitos de preenchimento e ficha de produção.
+Também cobrem o menu Objeto (cada item acionado pela janela principal), a lista de atalhos e a consistência com os menus, os tooltips
+da barra de ferramentas, a conversão de ponto corrido fechado e o arraste com o mouse (incluindo desfazer).
 
 ---
 
